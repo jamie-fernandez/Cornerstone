@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "paths": {
+            "@/*": ["./ui/*"],
+            "#build/ui": ["./node_modules/.nuxt-ui/ui"]
+        }
+    },
+    "exclude": ["node_modules", "dist"]
+}

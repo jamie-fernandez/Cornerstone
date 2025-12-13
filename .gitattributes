@@ -1,0 +1,21 @@
+# Auto detect text files and normalize line endings
+* text=auto
+
+# Enforce LF line endings for all text files
+# This is crucial for cross-platform consistency (Windows vs. macOS/Linux)
+*.* text eol=lf
+
+# Mark binary files to prevent Git from trying to normalize them
+*.exe binary
+*.dmg binary
+*.zip binary
+*.tar.gz binary
+*.png binary
+*.jpg binary
+*.svg binary
+
+# Treat specific documentation files as text
+#*.md text
+#*.json text
+#*.yml text
+#*.yaml text
