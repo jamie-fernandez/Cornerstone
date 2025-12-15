@@ -20,11 +20,9 @@ npm-debug.log
 # Vue / Vite
 # ========================
 .idea/ # IDE files
-.vscode/ # IDE files
 /ui/node_modules/
 /ui/dist/
 /ui/.vite/
-/ui/.vscode/
 
 # PyInstaller
 # ========================
@@ -196,3 +194,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+#cornerstone
+app/db/

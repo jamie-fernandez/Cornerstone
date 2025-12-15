@@ -11,18 +11,19 @@ from app.base import Base
 logger = logging.getLogger(__name__)
 Base = declarative_base()
 metadata = MetaData()
+db_name = f'{CONFIG['NAME']}.db'
 
 def get_db_path():
     """Get database path based on environment"""
     if CONFIG['DEBUG_ENV']:
         db_dir = os.path.join(os.path.dirname(__file__), 'db')
         os.makedirs(db_dir, exist_ok=True)
-        return os.path.join(db_dir, 'game.db')
+        return os.path.join(db_dir, db_name)
     else:
-        app_name = "YourGameName"  # TODO: Change this
+        app_name = CONFIG['NAME']
         data_dir = user_data_dir(app_name, appauthor=False)
         os.makedirs(data_dir, exist_ok=True)
-        return os.path.join(data_dir, 'game.db')
+        return os.path.join(data_dir, db_name)
 
 def init_db():
     """Initialize database connection"""
