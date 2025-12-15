@@ -24,7 +24,6 @@ npm-debug.log
 /ui/node_modules/
 /ui/dist/
 /ui/.vite/
-/ui/.vscode/
 
 # PyInstaller
 # ========================
