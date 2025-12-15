@@ -51,7 +51,7 @@ const activateVirtualEnvironment = () => {
 const setup = () => {
     try {
         console.log('Installing root Node dependencies...')
-        execSync('npm install', { stdio: 'inherit', cwd: projectRoot })
+        execSync('bun install', { stdio: 'inherit', cwd: projectRoot })
 
         console.log('Setting up Python virtual environment...')
 

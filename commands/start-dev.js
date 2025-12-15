@@ -9,7 +9,7 @@ const pythonExecutable = path.join(projectRoot, '.venv', 'bin', 'python3') // Th
 
 const { result } = concurrently([
     {
-        command: 'npm run dev',
+        command: 'bun run dev',
         name: 'UI',
         cwd: projectRoot,
         prefixColor: 'green',

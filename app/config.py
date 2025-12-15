@@ -1,7 +1,7 @@
-# app/config.py
-
+import json
 import os
 import sys
+import logging
 
 DEBUG_ENV = False
 BASE_PATH = ''
@@ -20,15 +20,21 @@ else:
     HTML_PATH = 'dist/index.html' # Bundled files
 
 
-CONFIG = {
-    'DEBUG_ENV': DEBUG_ENV,
-    'BASE_PATH': BASE_PATH,
-    'HTML_PATH': HTML_PATH,
-}
-
-import logging
-
 logging.basicConfig(
     level=logging.INFO if DEBUG_ENV else logging.WARNING,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+
+with open('package.json', 'r') as file:
+    data = json.load(file)
+
+APP_NAME = data.get('name')
+APP_VERSION = data.get('version')
+
+CONFIG = {
+    'NAME': APP_NAME,
+    'VERSION': APP_VERSION,
+    'DEBUG_ENV': DEBUG_ENV,
+    'BASE_PATH': BASE_PATH,
+    'HTML_PATH': HTML_PATH,
+}
