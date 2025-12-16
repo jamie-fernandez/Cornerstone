@@ -12,3 +12,8 @@ pyobjc-framework-webkit==12.1
 pywebview==6.1
 sqlalchemy==2.0.44
 typing-extensions==4.15.0
+
+
+# Development-only Python tools
+ruff>=0.14.9
+pre-commit>=3.4.0
