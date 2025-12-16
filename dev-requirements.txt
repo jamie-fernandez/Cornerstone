@@ -1,0 +1,7 @@
+# Development-only Python tools
+# Ruff provides linting, formatting, import sorting, and autofixes in one tool.
+# Pin a version if you prefer deterministic installs.
+ruff>=0.14.9
+
+# Optional: pre-commit hooks (recommended if you use pre-commit)
+pre-commit>=3.4.0
