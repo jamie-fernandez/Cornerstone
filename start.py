@@ -48,9 +48,11 @@ if __name__ == '__main__':
 
     api = Api()
 
+    title = f'{api.get_app_configuration()['NAME'].capitalize()}'
+
     # Launch the pywebview window
     primary_window = webview.create_window(
-        title='Vue3 Desktop App',
+        title=title,
         url=get_html_path(),
         width=2156,
         height=1309,
