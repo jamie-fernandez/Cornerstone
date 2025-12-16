@@ -11,6 +11,8 @@ import subprocess
 import time
 import argparse
 
+from app import Api, CONFIG
+
 
 def check_server_is_ready(port, retries=20, delay=1):
     """
@@ -44,11 +46,9 @@ if __name__ == '__main__':
             print('Vue dev server failed to start. Exiting.')
             sys.exit(1)
 
-    from app import Api
-
     api = Api()
 
-    title = f'{api.get_app_configuration()['NAME'].capitalize()}'
+    title = f'{CONFIG['NAME'].capitalize()}'
 
     # Launch the pywebview window
     primary_window = webview.create_window(
