@@ -1,8 +1,8 @@
-Issue(s): 
+Issue(s):
 
 ### Change Description
 
 ---
 ### Expectations
 
- - [ ] 
+ - [ ]
