@@ -1,68 +1,43 @@
 {
-  "theme": "Catppuccin Macchiato",
-  "buffer_font_size": 14,
-  "buffer_line_height": {
-    "custom": 1.6
-  },
-  "tab_size": 2,
-  "preferred_line_length": 80,
-  "soft_wrap": "editor_width",
-  "ensure_final_newline_on_save": true,
-  "remove_trailing_whitespace_on_save": true,
-  "vim_mode": true,
-  "languages": {
-    "Python": {
-      "format_on_save": "on",
-      "formatter": "language_server",
-      "language_servers": ["!pyright", "ruff"]
+    "theme": "Catppuccin Macchiato",
+    "buffer_font_size": 14,
+    "buffer_line_height": {
+        "custom": 1.6
     },
-    "JavaScript": {
-      "format_on_save": "on",
-      "formatter": "language_server",
-      "language_servers": ["!typescript-language-server", "!eslint", "biome"]
-    },
-    "TypeScript": {
-      "format_on_save": "on",
-      "formatter": "language_server",
-      "language_servers": ["!typescript-language-server", "!eslint", "biome"]
-    },
-    "Vue.js": {
-      "format_on_save": "on",
-      "formatter": "language_server",
-      "language_servers": ["vue-language-server", "biome"]
-    },
-    "JSON": {
-      "format_on_save": "on",
-      "formatter": "language_server",
-      "language_servers": ["vscode-json-language-server"]
-    },
-    "HTML": {
-      "format_on_save": "on",
-      "formatter": "language_server",
-      "language_servers": ["vscode-html-language-server"]
-    }
-  },
-  "lsp": {
-    "biome": {
-      "settings": {
-        "organize_imports": {
-          "enabled": true
+    "tab_size": 2,
+    "preferred_line_length": 80,
+    "soft_wrap": "editor_width",
+    "ensure_final_newline_on_save": true,
+    "remove_trailing_whitespace_on_save": true,
+    "vim_mode": true,
+    "languages": {
+        "Python": {
+            "format_on_save": "on",
+            "formatter": "language_server",
+            "language_servers": ["!pyright", "ruff"]
         }
-      }
     },
-    "ruff": {
-      "settings": {
-        "args": ["--no-cache", "--fix", "--unsafe-fixes"]
-      }
+    "lsp": {
+        "biome": {
+            "settings": {
+                "organize_imports": {
+                    "enabled": true
+                }
+            }
+        },
+        "ruff": {
+            "settings": {
+                "args": ["--no-cache", "--fix", "--unsafe-fixes"]
+            }
+        }
+    },
+    "terminal": {
+        "shell": {
+            "program": "/bin/zsh"
+        }
+    },
+    "telemetry": {
+        "diagnostics": true,
+        "metrics": false
     }
-  },
-  "terminal": {
-    "shell": {
-      "program": "/bin/zsh"
-    }
-  },
-  "telemetry": {
-    "diagnostics": true,
-    "metrics": false
-  }
 }
