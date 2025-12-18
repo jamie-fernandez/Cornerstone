@@ -1,0 +1,15 @@
+[
+  {
+    "context": "Editor && VimControl && !VimWaiting && !menu",
+    "bindings": {
+      "ctrl-b": "vim::ToggleRelativeLineNumbers",
+      "ctrl-p": "file_finder::Toggle",
+      "ctrl-shift-p": "command_palette::Toggle",
+      "ctrl-w h": "workspace::ActivatePaneInDirection",
+      "ctrl-w l": "workspace::ActivatePaneInDirection",
+      "ctrl-w k": "workspace::ActivatePaneInDirection",
+      "ctrl-w j": "workspace::ActivatePaneInDirection",
+      "ctrl-shift-t": "history::OpenRecent"
+    }
+  }
+]

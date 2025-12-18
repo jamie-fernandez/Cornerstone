@@ -57,4 +57,3 @@ if __name__ == "__main__":
     api.set_window(primary_window)
 
     webview.start(debug=True)
-    webview.start(debug=True)
