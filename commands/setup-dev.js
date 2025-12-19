@@ -74,9 +74,7 @@ const setup = () => {
         })
 
         console.log('Development environment setup is complete! 🎉')
-        console.log(
-            'You can now run "npm run start:dev" to start the application.',
-        )
+        console.log('You can now run "bun run start" to start the application.')
         console.log(
             '\nNote: The virtual environment has been activated for this process.',
         )
