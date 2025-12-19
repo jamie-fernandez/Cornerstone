@@ -1,6 +1,7 @@
 {
     "name": "cornerstone",
     "version": "0.0.0",
+    "description": "",
     "private": true,
     "type": "module",
     "engines": {
