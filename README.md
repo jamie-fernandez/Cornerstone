@@ -24,7 +24,7 @@ Cornerstone is a starter template for building cross-platform desktop applicatio
 Run the setup command to install all dependencies:
 
 ```bash
-bun run setup
+npm run setup
 ```
 
 **What to expect:**
@@ -52,7 +52,7 @@ bun run start
 
 ```
 cornerstone/
-├── app/                    # Python backend
+├── app/                   # Python backend
 │   ├── api.py             # API routes
 │   ├── models.py          # Database models
 │   ├── database.py        # Database configuration

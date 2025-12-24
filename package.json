@@ -10,6 +10,7 @@
     "scripts": {
         "setup": "node commands/setup-dev.js",
         "start": "node commands/start-dev.js",
+        "dev": "vite",
         "test:app": "pytest app/__tests__/",
         "test:ui:unit": "vitest",
         "test:ui:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
