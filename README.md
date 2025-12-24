@@ -1,6 +1,6 @@
 # Cornerstone
 
-A desktop app template built with Vue.js, Vite, and Python.
+A template to help build desktop apps with Vue.js and Python.
 
 ## About This Template
 
