@@ -1,92 +1,128 @@
 import { execSync } from 'node:child_process'
-import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// Convert import.meta.url to a file path
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const projectRoot = path.resolve(__dirname, '..')
 
-const checkVirtualEnvironment = () => {
-    const venvPath = path.join(projectRoot, '.venv')
-    const pythonExecutable =
-        process.platform === 'win32'
-            ? path.join(venvPath, 'Scripts', 'python.exe')
-            : path.join(venvPath, 'bin', 'python3')
-
-    return {
-        exists: fs.existsSync(venvPath),
-        pythonExecutable,
+const checkCommand = (command) => {
+    try {
+        execSync(`which ${command}`, { stdio: 'pipe' })
+        return true
+    } catch {
+        return false
     }
 }
 
-const createVirtualEnvironment = () => {
-    console.log('Creating Python virtual environment...')
-    execSync('python3 -m venv .venv', { stdio: 'inherit', cwd: projectRoot })
+const installBun = () => {
+    console.log('\n╭─────────────────────────────────────────╮')
+    console.log('│  Installing Bun.js...                  │')
+    console.log('╰─────────────────────────────────────────╯\n')
+
+    try {
+        if (process.platform === 'darwin') {
+            execSync('curl -fsSL https://bun.sh/install | bash', {
+                stdio: 'inherit',
+            })
+        } else if (process.platform === 'linux') {
+            execSync('curl -fsSL https://bun.sh/install | bash', {
+                stdio: 'inherit',
+            })
+        } else if (process.platform === 'win32') {
+            execSync('powershell -c "irm bun.sh/install.ps1|iex"', {
+                stdio: 'inherit',
+                shell: 'powershell.exe',
+            })
+        }
+        console.log('✓ Bun.js installed successfully\n')
+        return true
+    } catch (error) {
+        console.error('✗ Failed to install Bun.js:', error.message)
+        return false
+    }
 }
 
-const activateVirtualEnvironment = () => {
-    const { pythonExecutable } = checkVirtualEnvironment()
+const installUV = () => {
+    console.log('\n╭─────────────────────────────────────────╮')
+    console.log('│  Installing UV...                      │')
+    console.log('╰─────────────────────────────────────────╯\n')
 
-    // Set environment variables to simulate activation
-    const venvPath = path.join(projectRoot, '.venv')
-    const binPath =
-        process.platform === 'win32'
-            ? path.join(venvPath, 'Scripts')
-            : path.join(venvPath, 'bin')
-
-    // Prepend venv bin directory to PATH
-    process.env.PATH = `${binPath}${path.delimiter}${process.env.PATH}`
-    process.env.VIRTUAL_ENV = venvPath
-
-    // Remove PYTHONHOME if it exists to avoid conflicts
-    delete process.env.PYTHONHOME
-
-    console.log('✓ Virtual environment activated')
-    return pythonExecutable
+    try {
+        if (process.platform === 'darwin' || process.platform === 'linux') {
+            execSync('curl -LsSf https://astral.sh/uv/install.sh | sh', {
+                stdio: 'inherit',
+            })
+        } else if (process.platform === 'win32') {
+            execSync(
+                'powershell -c "irm https://astral.sh/uv/install.ps1 | iex"',
+                {
+                    stdio: 'inherit',
+                    shell: 'powershell.exe',
+                },
+            )
+        }
+        console.log('✓ UV installed successfully\n')
+        return true
+    } catch (error) {
+        console.error('✗ Failed to install UV:', error.message)
+        return false
+    }
 }
 
 const setup = () => {
     try {
-        console.log('Installing root Node dependencies...')
+        console.log('\n╔═════════════════════════════════════════╗')
+        console.log('║  Development Environment Setup        ║')
+        console.log('╚═════════════════════════════════════════╝\n')
+
+        // Check and install Bun if needed
+        if (!checkCommand('bun')) {
+            console.log('⚠ Bun.js not found. Installing...')
+            if (!installBun()) {
+                console.error(
+                    '✗ Bun installation failed. Please install manually: https://bun.sh',
+                )
+                process.exit(1)
+            }
+        } else {
+            console.log('✓ Bun.js is already installed\n')
+        }
+
+        // Check and install UV if needed
+        if (!checkCommand('uv')) {
+            console.log('⚠ UV not found. Installing...')
+            if (!installUV()) {
+                console.error(
+                    '✗ UV installation failed. Please install manually: https://docs.astral.sh/uv/getting-started/installation/',
+                )
+                process.exit(1)
+            }
+        } else {
+            console.log('✓ UV is already installed\n')
+        }
+
+        // Install Node dependencies with Bun
+        console.log('╭─────────────────────────────────────────╮')
+        console.log('│  Installing Node dependencies...       │')
+        console.log('╰─────────────────────────────────────────╯\n')
         execSync('bun install', { stdio: 'inherit', cwd: projectRoot })
+        console.log('\n✓ Node dependencies installed\n')
 
-        console.log('Setting up Python virtual environment...')
+        // Install Python dependencies with UV
+        console.log('╭─────────────────────────────────────────╮')
+        console.log('│  Installing Python dependencies...     │')
+        console.log('╰─────────────────────────────────────────╯\n')
+        execSync('uv sync', { stdio: 'inherit', cwd: projectRoot })
+        console.log('\n✓ Python dependencies installed\n')
 
-        const venvStatus = checkVirtualEnvironment()
-        let pythonExecutable
-
-        if (venvStatus.exists) {
-            console.log('✓ Virtual environment already exists')
-            pythonExecutable = activateVirtualEnvironment()
-        } else {
-            createVirtualEnvironment()
-            pythonExecutable = activateVirtualEnvironment()
-        }
-
-        console.log('Installing Python dependencies...')
-        execSync(`"${pythonExecutable}" -m pip install -r requirements.txt`, {
-            stdio: 'inherit',
-            cwd: projectRoot,
-            env: process.env,
-        })
-
-        console.log('Development environment setup is complete! 🎉')
+        console.log('╭─────────────────────────────────────────╮')
+        console.log('│  Setup Complete! 🎉                     │')
+        console.log('╰─────────────────────────────────────────╯\n')
         console.log('You can now run "bun run start" to start the application.')
-        console.log(
-            '\nNote: The virtual environment has been activated for this process.',
-        )
-        console.log('To manually activate it in your shell, run:')
-
-        if (process.platform === 'win32') {
-            console.log('  .venv\\Scripts\\activate')
-        } else {
-            console.log('  source .venv/bin/activate')
-        }
     } catch (error) {
-        console.error('An error occurred during setup:', error.message)
+        console.error('✗ An error occurred during setup:', error.message)
         process.exit(1)
     }
 }
