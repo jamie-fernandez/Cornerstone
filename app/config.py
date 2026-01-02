@@ -1,40 +1,35 @@
-import json
 import os
 import sys
 import logging
 
-DEBUG_ENV = False
+DEBUG = False
 BASE_PATH = ""
 HTML_PATH = ""
 
 if getattr(sys, "frozen", False):
     BASE_PATH = sys._MEIPASS  # PyInstaller temp folder
-    DEBUG_ENV = False
+    DEBUG = False
 else:
     BASE_PATH = os.path.dirname(__file__)
-    DEBUG_ENV = True
+    DEBUG = True
 
-if DEBUG_ENV:
+if DEBUG:
     HTML_PATH = "http://localhost:5173"  # Dev server
 else:
     HTML_PATH = "dist/index.html"  # Bundled files
 
-
 logging.basicConfig(
-    level=logging.INFO if DEBUG_ENV else logging.WARNING,
+    level=logging.INFO if DEBUG else logging.WARNING,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
-with open("package.json", "r") as file:
-    data = json.load(file)
-
-APP_NAME = data.get("name")
-APP_VERSION = data.get("version")
+APP_NAME = 'Cornerstone'
+APP_VERSION = '0.0.0'
 
 CONFIG = {
     "NAME": APP_NAME,
     "VERSION": APP_VERSION,
-    "DEBUG_ENV": DEBUG_ENV,
+    "DEBUG": DEBUG,
     "BASE_PATH": BASE_PATH,
     "HTML_PATH": HTML_PATH,
 }
