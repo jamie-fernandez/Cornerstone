@@ -16,7 +16,7 @@ db_name = f"{CONFIG['NAME']}.db"
 
 def get_db_path():
     """Get database path based on environment"""
-    if CONFIG["DEBUG"]:
+    if CONFIG["DEBUG_ENV"]:
         db_dir = os.path.join(os.path.dirname(__file__), "db")
         os.makedirs(db_dir, exist_ok=True)
         return os.path.join(db_dir, db_name)

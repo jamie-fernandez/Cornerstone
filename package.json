@@ -15,8 +15,7 @@
         "test:ui:unit": "vitest",
         "test:ui:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
         "test:ui:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
-        "lint:fix": "bunx biome check --write",
-        "build:win": "bun run vite build && uv run commands/build-pyinstaller.py"
+        "lint:fix": "bunx biome check --write"
     },
     "dependencies": {
         "@faker-js/faker": "^10.1.0",

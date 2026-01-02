@@ -7,6 +7,7 @@ import webview
 
 from app import CONFIG, Api
 
+
 def check_server_is_ready(port, retries=20, delay=1):
     """
     Checks if a server is listening on a given port.
@@ -25,14 +26,7 @@ def check_server_is_ready(port, retries=20, delay=1):
 def get_html_path():
     """Returns the correct path to the ui, regardless of environment."""
     if getattr(sys, "frozen", False):
-        base_path = sys._MEIPASS
-        index_path = os.path.join(base_path, "ui", "dist", "index.html")
-
-        if os.path.exists(index_path):
-            return index_path
-        else:
-            print(f"Warning: Could not find index.html at {index_path}")
-            return os.path.join(base_path, "index.html")
+        return os.path.join(sys._MEIPASS, "dist", "index.html")
     else:
         return "http://localhost:5173"
 
