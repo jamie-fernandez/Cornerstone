@@ -13,28 +13,19 @@ def build_app():
     dist_dir = os.path.join(project_root, "dist")
     build_dir = os.path.join(project_root, "build")
 
-    # Verify UI dist directory exists
-    if not os.path.exists(UI_dist_dir):
-        print(f"ERROR: UI dist directory not found at {UI_dist_dir}")
-        print("Please run 'bun run vite build' first to build the Vue app.")
-        return
-
     if os.path.exists(dist_dir):
         shutil.rmtree(dist_dir)
     if os.path.exists(build_dir):
         shutil.rmtree(build_dir)
 
-    # Determine the correct path separator for --add-data based on OS
-    separator = ";" if os.name == "nt" else ":"
-
     args = [
         "pyinstaller",
+        "--onefile",
         "--windowed",
-        "--clean",
         "--add-data",
-        f"{UI_dist_dir}{separator}ui/dist",
+        f"{UI_dist_dir}{os.path.sep};dist",
         "--name",
-        "Cornerstone",
+        "my_app",
         app_path,
     ]
 

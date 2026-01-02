@@ -68,10 +68,6 @@ cornerstone/
 └── commands/              # Setup and build scripts
 ```
 
-## Testing Builds (Only available for Windows at the moment)
-Run the `bun run build:win` command then navigate to the `cornerstone\dist\Cornerstone` will a `Cornerstone.exe` file has been generated. Click on the `.exe` file to start the desktop app. You should see `"Hello World!"` text on the screen.
-
-
 ## Available Commands
 
 | Command                | Purpose                            |
@@ -80,7 +76,6 @@ Run the `bun run build:win` command then navigate to the `cornerstone\dist\Corne
 | `bun run start`        | Start development servers          |
 | `bun run test:ui:unit` | Run all frontend unit tests        |
 | `bun run test:app`     | Run python unit tests              |
-| `bun run build:win`    | Builds a .exe file fow Windows     |
 
 ## Development Notes
 
