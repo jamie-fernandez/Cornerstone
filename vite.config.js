@@ -28,4 +28,9 @@ export default defineConfig({
             '@': fileURLToPath(new URL('./ui', import.meta.url)),
         },
     },
+    base: './',
+    build: {
+        outDir: 'ui/dist',
+        emptyOutDir: true,
+    }
 })
