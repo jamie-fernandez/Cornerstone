@@ -17,8 +17,9 @@ const checkCommand = (command) => {
 }
 
 const installBun = () => {
-    console.log('\n╭─────────────────────────────────────────╮')
-    console.log('│  Installing Bun.js...                  │')
+    console.log('\n')
+    console.log('╭─────────────────────────────────────────╮')
+    console.log('│  Installing Bun.js...                   │')
     console.log('╰─────────────────────────────────────────╯\n')
 
     try {
@@ -31,7 +32,7 @@ const installBun = () => {
                 stdio: 'inherit',
             })
         } else if (process.platform === 'win32') {
-            execSync('powershell -c "irm bun.sh/install.ps1|iex"', {
+            execSync('powershell -c "irm bun.sh/install.ps1 | iex"', {
                 stdio: 'inherit',
                 shell: 'powershell.exe',
             })
@@ -45,8 +46,9 @@ const installBun = () => {
 }
 
 const installUV = () => {
-    console.log('\n╭─────────────────────────────────────────╮')
-    console.log('│  Installing UV...                      │')
+    console.log('\n')
+    console.log('╭─────────────────────────────────────────╮')
+    console.log('│  Installing UV...                       │')
     console.log('╰─────────────────────────────────────────╯\n')
 
     try {
@@ -73,9 +75,10 @@ const installUV = () => {
 
 const setup = () => {
     try {
-        console.log('\n╔═════════════════════════════════════════╗')
-        console.log('║  Development Environment Setup        ║')
-        console.log('╚═════════════════════════════════════════╝\n')
+        console.log('\n')
+        console.log('╔═══════════════════════════════════════════╗')
+        console.log('║  Development Environment Setup            ║')
+        console.log('╚═══════════════════════════════════════════╝\n')
 
         // Check and install Bun if needed
         if (!checkCommand('bun')) {
@@ -105,20 +108,20 @@ const setup = () => {
 
         // Install Node dependencies with Bun
         console.log('╭─────────────────────────────────────────╮')
-        console.log('│  Installing Node dependencies...       │')
+        console.log('│  Installing Node dependencies...        │')
         console.log('╰─────────────────────────────────────────╯\n')
         execSync('bun install', { stdio: 'inherit', cwd: projectRoot })
         console.log('\n✓ Node dependencies installed\n')
 
         // Install Python dependencies with UV
         console.log('╭─────────────────────────────────────────╮')
-        console.log('│  Installing Python dependencies...     │')
+        console.log('│  Installing Python dependencies...      │')
         console.log('╰─────────────────────────────────────────╯\n')
         execSync('uv sync', { stdio: 'inherit', cwd: projectRoot })
         console.log('\n✓ Python dependencies installed\n')
 
         console.log('╭─────────────────────────────────────────╮')
-        console.log('│  Setup Complete! 🎉                     │')
+        console.log('│  Setup Complete!                        │')
         console.log('╰─────────────────────────────────────────╯\n')
         console.log('You can now run "bun run start" to start the application.')
     } catch (error) {
