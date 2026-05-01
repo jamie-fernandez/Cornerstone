@@ -3,10 +3,13 @@
 
 include:
   - project: 'dependabot-gitlab/dependabot-standalone'
-    file: '.gitlab-ci.yml'
+    file: 'templates/template.yml'
+
+stages:
+  - dependabot
 
 dependabot:
-  extends: .dependabot
+  extends: .dependabot-gitlab
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "web"
