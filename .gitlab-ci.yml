@@ -1,0 +1,18 @@
+# Dependabot configuration for GitLab
+# This uses the dependabot-standalone template to run updates via GitLab CI.
+
+include:
+  - project: 'dependabot-gitlab/dependabot-standalone'
+    file: '.gitlab-ci.yml'
+
+dependabot:
+  extends: .dependabot
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: manual
+      allow_failure: true
+
+# Note: You must configure the following CI/CD variables in GitLab:
+# - SETTINGS__GITLAB_ACCESS_TOKEN: A GitLab PAT with 'api' and 'read_repository' scopes.
+# - SETTINGS__GITHUB_ACCESS_TOKEN: A GitHub PAT (optional but recommended to avoid rate limits).
