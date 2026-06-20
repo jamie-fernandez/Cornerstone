@@ -1,96 +1,138 @@
 # Cornerstone
 
-A template to help build desktop apps with Vue.js and Python.
+A template repository for building cross-platform desktop applications for macOS, Linux, and Windows using Vue.js and Python.
 
-## About This Template
+## Overview
 
-Cornerstone is a starter template for building cross-platform desktop applications using:
-- **Frontend:** Vue.js 3 with Vite for fast development
-- **Backend:** Python with a REST API
-- **Package Managers:** Bun for Node.js, UV for Python
-- **Testing:** Vitest for frontend, Pytest for backend, Cypress for E2E
+Cornerstone provides a robust starting point for desktop application development by combining a modern Vue.js frontend with a powerful Python backend, unified through the `pywebview` library. It leverages high-performance package managers and development tools to ensure a smooth developer experience.
 
-## Prerequisites
+### Tech Stack
 
-- **Node.js** (latest LTS recommended)
-- **Python** 3.8+
-- **Bun.js** (will be auto-installed if missing)
-- **UV** (will be auto-installed if missing)
+- **Frontend:** [Vue.js 3](https://vuejs.org/) with [Vite](https://vitejs.dev/)
+- **UI Framework:** [Vuetify 3](https://vuetifyjs.com/) & [Tailwind CSS 4](https://tailwindcss.com/)
+- **Backend:** [Python 3.13+](https://www.python.org/)
+- **Desktop Bridge:** [pywebview](https://pywebview.flowrl.com/)
+- **Database:** [SQLAlchemy](https://www.sqlalchemy.org/) (SQLite by default)
+- **Package Managers:** [Bun](https://bun.sh/) & [UV](https://docs.astral.sh/uv/) (Python)
+- **Code Quality:** [Biome](https://biomejs.dev/) (JS/TS) & [Ruff](https://docs.astral.sh/ruff/) (Python)
+- **Testing:** [Vitest](https://vitest.dev/) (Unit), [Pytest](https://pytest.org/) (Backend), [Cypress](https://www.cypress.io/) (E2E)
+
+## Requirements
+
+- **Python:** 3.13 or higher
+- **Bun:** (Will be auto-installed by setup if missing)
+- **UV:** (Will be auto-installed by setup if missing)
 
 ## Getting Started
 
 ### 1. Setup Development Environment
 
-Run the setup command to install all dependencies:
+Run the following command to install all dependencies and configure virtual environments:
 
 ```bash
-npm run setup
+python3 commands/setup.py
 ```
 
-**What to expect:**
-- ✓ Checks for Bun.js and installs it if needed
-- ✓ Checks for UV (Python package manager) and installs it if needed
-- ✓ Installs Node.js dependencies using Bun
-- ✓ Installs Python dependencies using UV
-- Clear console messages showing each step of the process
+**What this does:**
+- Checks for and installs **Bun.js** and **UV** if they are missing.
+- Installs frontend dependencies using `bun install`.
+- Installs Python dependencies and creates a virtual environment using `uv sync`.
 
 ### 2. Start the Application
 
-Once setup is complete, start the development server:
+To launch the application in development mode with hot-reload enabled for both frontend and backend:
 
 ```bash
-bun run start
+bash commands/start-dev
 ```
 
 **What to expect:**
-- ✓ Launches the Vue.js frontend development server
-- ✓ Starts the Python backend API server
-- ✓ Both servers run concurrently with hot-reload enabled
-- ✓ Application will be available in your browser (typically http://localhost:5173)
-
-## Project Structure
-
-```
-cornerstone/
-├── app/                   # Python backend
-│   ├── api.py             # API routes
-│   ├── models.py          # Database models
-│   ├── database.py        # Database configuration
-│   └── __tests__/         # Python unit tests
-├── ui/                    # Vue.js frontend
-│   ├── App.vue            # Main component
-│   ├── router.js          # Route configuration
-│   ├── main.js            # Entry point
-│   ├── pages/             # Page components
-│   ├── stores/            # Pinia state management
-│   └── __tests__/         # Frontend tests
-├── cypress/               # End-to-end tests
-└── commands/              # Setup and build scripts
-```
-
-## Testing Builds (Only available for Windows at the moment)
-Run the `bun run build:win` command then navigate to the `cornerstone\dist\Cornerstone` will a `Cornerstone.exe` file has been generated. Click on the `.exe` file to start the desktop app. You should see `"Hello World!"` text on the screen.
-
+- The Vite development server starts for the Vue frontend.
+- The Python backend launches and opens a `pywebview` window.
+- The application window will appear, loading the frontend from the dev server.
 
 ## Available Commands
 
-| Command                | Purpose                            |
-| ---------------------- | ---------------------------------- |
-| `bun run setup`        | Initialize development environment |
-| `bun run start`        | Start development servers          |
-| `bun run test:ui:unit` | Run all frontend unit tests        |
-| `bun run test:app`     | Run python unit tests              |
-| `bun run build:win`    | Builds a .exe file for Windows     |
+| Command | Purpose |
+| :--- | :--- |
+| `python3 commands/setup.py` | Initialize the development environment and dependencies. |
+| `bash commands/start-dev.sh` | Start both frontend and backend in development mode. |
+| `bash commands/build.sh` | Build the production assets for both frontend and backend. |
+| `bun run dev` | Start only the Vite development server (frontend). |
+| `bun run test:ui:unit` | Run frontend unit tests using Vitest. |
+| `bun run test:app` | Run backend unit tests using Pytest. |
+| `bun run test:ui:e2e` | Run end-to-end tests using Cypress. |
+| `bun run lint:fix` | Run Biome to check and fix code formatting/linting. |
+| `bun run build:win` | Package the application as a Windows executable. |
+| `bun run build:mac` | Package the application as a macOS bundle. |
 
-## Development Notes
+## Project Structure
 
-- The setup script handles virtual environment management via UV
-- Both frontend and backend servers support hot-reload during development
-- Tests can be run independently for frontend (vitest) and backend (pytest)
+```text
+cornerstone/
+├── app/                # Python Backend
+│   ├── api.py          # JS-exposed API classes
+│   ├── config.py       # Backend configuration
+│   ├── database.py     # Database & SQLAlchemy setup
+│   ├── models.py       # Database models
+│   └── __tests__/      # Backend unit tests
+├── ui/                 # Vue.js Frontend
+│   ├── App.vue         # Root Vue component
+│   ├── main.js         # Frontend entry point
+│   ├── pages/          # Vue page components
+│   ├── stores/         # Pinia state management
+│   └── __tests__/      # Frontend unit tests
+├── commands/           # Development & Build scripts
+├── cypress/            # End-to-end tests
+├── dist/               # Production build output
+├── index.html          # Vite entry HTML
+├── pyproject.toml      # Python project configuration
+├── package.json        # Frontend project configuration
+└── start.py            # Main application entry point (Python)
+```
+
+## Environment Variables
+
+Currently, the project uses a centralized configuration in `app/config.py`. 
+
+- **TODO:** Implement support for `.env` files if environment-specific overrides are needed.
+
+## Testing
+
+### Frontend Unit Tests
+```bash
+bun run test:ui:unit
+```
+
+### Backend Unit Tests
+```bash
+bun run test:app
+```
+
+### End-to-End Tests
+```bash
+bun run test:ui:e2e
+```
+
+### GitLab CI (Local)
+To test and debug GitLab CI pipelines locally, it is recommended to use [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local).
+
+## Building for Production
+
+To create a standalone executable:
+
+```bash
+bash commands/build
+```
+
+This will build the Vue frontend, then use PyInstaller (via `commands/build-pyinstaller.py`) to bundle the Python backend and the built UI into a single executable located in the `dist/` folder.
 
 ## Troubleshooting
 
-If you encounter issues during setup:
-1. Ensure you have Node.js and Python installed
-2. Run `bun run setup` again to reinstall dependencies
-3. Check that Bun and UV installed successfully
+1. **Dependencies:** If you encounter issues, try running `python3 commands/setup.py` again to ensure all tools (Bun, UV) and packages are correctly installed.
+2. **Python Version:** Ensure `python3 --version` reports 3.13 or higher.
+3. **Port Conflicts:** The dev server uses port `5173`. Ensure it is available.
+
+## License
+
+- **TODO:** Add license information (e.g., MIT, Apache 2.0).

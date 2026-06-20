@@ -4,18 +4,48 @@
 include:
   - project: 'dependabot-gitlab/dependabot-standalone'
     file: 'templates/template.yml'
+    inputs:
+      gitlab_access_token: $SETTINGS__GITLAB_ACCESS_TOKEN
+      github_access_token: $SETTINGS__GITHUB_ACCESS_TOKEN
 
 stages:
+  - lint
+  - test
   - dependabot
+
+lint:python:
+  image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+  stage: lint
+  script:
+    - uv sync
+    - uv run ruff check .
+
+lint:frontend:
+  image: oven/bun:latest
+  stage: lint
+  script:
+    - bun install
+    - bun x biome check .
+
+test:python:
+  image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+  stage: test
+  script:
+    - uv sync
+    - uv run pytest app/__tests__/
+
+test:frontend:
+  image: oven/bun:latest
+  stage: test
+  script:
+    - bun install
+    - bun run test:ui:unit --run
 
 dependabot:
   extends: .dependabot-gitlab
+  stage: dependabot
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "web"
       when: manual
       allow_failure: true
-
-# Note: You must configure the following CI/CD variables in GitLab:
-# - SETTINGS__GITLAB_ACCESS_TOKEN: A GitLab PAT with 'api' and 'read_repository' scopes.
-# - SETTINGS__GITHUB_ACCESS_TOKEN: A GitHub PAT (optional but recommended to avoid rate limits).
