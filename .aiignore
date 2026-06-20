@@ -1,0 +1,53 @@
+# An .aiignore file follows the same syntax as a .gitignore file.
+# .gitignore documentation: https://git-scm.com/docs/gitignore
+
+# you can ignore files
+.DS_Store
+*.log
+*.tmp
+
+# or folders
+dist/
+build/
+out/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node / Vue
+node_modules/
+.vite/
+.cache/
+*.local
+
+# Env / secrets
+.env.*
+!*.env.example
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+
+# Lockfiles (optional — large, low signal for AI context)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+poetry.lock
+bun.lock
+bun.lockb
+
+# Coverage / test artifacts
+coverage/
+htmlcov/
+.coverage

@@ -4,19 +4,16 @@
     "description": "",
     "private": true,
     "type": "module",
-    "engines": {
-        "node": "^20.19.0 || >=22.12.0"
-    },
     "scripts": {
-        "setup": "node commands/setup-dev.js",
-        "start": "node commands/start-dev.js",
+        "setup": "python3 commands/setup.py",
+        "start": "bash commands/start-dev",
         "dev": "vite",
         "test:app": "pytest app/__tests__/",
         "test:ui:unit": "vitest",
         "test:ui:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
         "test:ui:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
-        "lint:fix": "bunx biome check --write",
-        "build": "bun run vite build && uv run commands/build-pyinstaller.py",
+        "lint:fix": "bun x biome check --write",
+        "build": "bash commands/build",
         "build:mac": "bun run build",
         "build:win": "bun run build"
     },
