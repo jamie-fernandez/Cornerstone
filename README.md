@@ -13,7 +13,7 @@ Cornerstone provides a robust starting point for desktop application development
 - **Backend:** [Python 3.13+](https://www.python.org/)
 - **Desktop Bridge:** [pywebview](https://pywebview.flowrl.com/)
 - **Database:** [SQLAlchemy](https://www.sqlalchemy.org/) (SQLite by default)
-- **Package Managers:** [Bun](https://bun.sh/) & [UV](https://docs.astral.sh/uv/) (Python)
+- **Package Managers:** [Bun](https://bun.sh/) & [UV](https://docs.astral.sh/uv/) (Python). **Note:** We use `uv` for all Python dependency management and execution. Do not use `pip`.
 - **Code Quality:** [Biome](https://biomejs.dev/) (JS/TS) & [Ruff](https://docs.astral.sh/ruff/) (Python)
 - **Testing:** [Vitest](https://vitest.dev/) (Unit), [Pytest](https://pytest.org/) (Backend), [Cypress](https://www.cypress.io/) (E2E)
 
@@ -56,8 +56,8 @@ bash commands/start-dev
 | Command | Purpose |
 | :--- | :--- |
 | `python3 commands/setup.py` | Initialize the development environment and dependencies. |
-| `bash commands/start-dev.sh` | Start both frontend and backend in development mode. |
-| `bash commands/build.sh` | Build the production assets for both frontend and backend. |
+| `bash commands/start-dev` | Start both frontend and backend in development mode. |
+| `bash commands/build` | Build the production assets for both frontend and backend. |
 | `bun run dev` | Start only the Vite development server (frontend). |
 | `bun run test:ui:unit` | Run frontend unit tests using Vitest. |
 | `bun run test:app` | Run backend unit tests using Pytest. |
@@ -116,6 +116,25 @@ bun run test:ui:e2e
 
 ### GitLab CI (Local)
 To test and debug GitLab CI pipelines locally, it is recommended to use [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local).
+
+## GitLab Labels
+
+| Label | Description |
+|---|---|
+| frontend | Changes related to the Vue.js frontend (ui/ directory). |
+| backend | Changes related to the Python backend (app/ directory or start.py file). |
+| feature | A new feature for the user; aligns with a MINOR version bump in semver. |
+| fix | A bug fix for the user; aligns with a PATCH version bump in semver. |
+| breaking-change | A change that breaks backward compatibility; aligns with a MAJOR version bump in semver. |
+| documentation | Changes to documentation only, with no effect on code behavior. |
+| style | Formatting or whitespace changes that don't affect code logic. |
+| refactor | A code change that neither fixes a bug nor adds a feature. |
+| performance | A code change that improves performance. |
+| testing | Adding or correcting tests, with no changes to production code. |
+| build | Changes to the build system or external dependencies. |
+| continuous-integration | Changes to CI configuration files and scripts. |
+| chore | Routine maintenance tasks that don't modify source or test files. |
+| revert | Reverts a previous commit. |
 
 ## Building for Production
 
