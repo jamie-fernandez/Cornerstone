@@ -1,5 +1,11 @@
-# Dependabot configuration for GitLab
-# This uses the dependabot-standalone template to run updates via GitLab CI.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
 
 include:
   - project: 'dependabot-gitlab/dependabot-standalone'
@@ -9,9 +15,18 @@ include:
       github_access_token: $SETTINGS__GITHUB_ACCESS_TOKEN
 
 stages:
+  - setup
   - lint
   - test
   - dependabot
+
+merge-request:setup:
+  image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+  stage: setup
+  script:
+    - python3 .gitlab/merge-request-setup.py
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 lint:python:
   image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
@@ -41,11 +56,13 @@ test:frontend:
     - bun install
     - bun run test:ui:unit --run
 
-dependabot:
-  extends: .dependabot-gitlab
-  stage: dependabot
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-    - if: $CI_PIPELINE_SOURCE == "web"
-      when: manual
-      allow_failure: true
+# Dependabot configuration for GitLab
+# This uses the dependabot-standalone template to run updates via GitLab CI.
+#dependabot:
+#  extends: .dependabot-gitlab
+#  stage: dependabot
+#  rules:
+#    - if: $CI_PIPELINE_SOURCE == "schedule"
+#    - if: $CI_PIPELINE_SOURCE == "web"
+#      when: manual
+#      allow_failure: true

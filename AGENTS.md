@@ -8,7 +8,7 @@ The project is hosted on **GitLab**: [https://gitlab.com/jnf-desktop-apps/corner
 
 - **Frontend:** Vue 3, Vite, Vuetify 3, Tailwind CSS 4, Pinia.
 - **Backend:** Python 3.13+, `pywebview`, SQLAlchemy (SQLite).
-- **Tooling:** Bun (JS), UV (Python), Biome (Linting JS), Ruff (Linting Python), [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local).
+- **Tooling:** Bun (JS), UV (Python - **Preferred over pip**), Biome (Linting JS), Ruff (Linting Python), [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local).
 - **Testing:** Vitest (Frontend), Pytest (Backend), Cypress (E2E).
 
 ## 🏗️ Architecture: The Python-JS Bridge
@@ -41,7 +41,7 @@ Note: This requires both the Vite dev server and the Python process to be runnin
 - **Backend:** `bun run test:app`
 - **E2E:** `bun run test:ui:e2e`
 - **CI Pipelines (Local):** Use [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local) to run and debug GitLab CI jobs locally.
-- **CI Pipelines (Remote):** The `.gitlab-ci.yml` defines stages for `lint` (Ruff/Biome), `test` (Pytest/Vitest), and `dependabot`. Ensure `SETTINGS__GITLAB_ACCESS_TOKEN` is configured in GitLab CI/CD variables.
+- **CI Pipelines (Remote):** The `.gitlab-ci.yml` defines stages for `setup` (Merge Request automation), `lint` (Ruff/Biome), `test` (Pytest/Vitest), and `dependabot`. Ensure `SETTINGS__GITLAB_ACCESS_TOKEN` is configured in GitLab CI/CD variables. **Important:** Uncheck the "Protected" flag for this variable if you want the automation to work on Merge Request pipelines from non-protected feature branches.
 
 ## ➕ How to Add a New Feature
 
@@ -75,6 +75,25 @@ To add a feature that requires backend logic:
 
 - **Keep it Synchronized:** When adding features or changing commands, always update `README.md` (for users) and `AGENTS.md` (for developers/agents).
 - **Self-Documenting Code:** Use clear function names and Docstrings in Python, and JSDoc in Vue components.
+
+## 🏷️ GitLab Labels
+
+| Label | Description |
+|---|---|
+| frontend | Changes related to the Vue.js frontend (ui/ directory). |
+| backend | Changes related to the Python backend (app/ directory or start.py file). |
+| feature | A new feature for the user; aligns with a MINOR version bump in semver. |
+| fix | A bug fix for the user; aligns with a PATCH version bump in semver. |
+| breaking-change | A change that breaks backward compatibility; aligns with a MAJOR version bump in semver. |
+| documentation | Changes to documentation only, with no effect on code behavior. |
+| style | Formatting or whitespace changes that don't affect code logic. |
+| refactor | A code change that neither fixes a bug nor adds a feature. |
+| performance | A code change that improves performance. |
+| testing | Adding or correcting tests, with no changes to production code. |
+| build | Changes to the build system or external dependencies. |
+| continuous-integration | Changes to CI configuration files and scripts. |
+| chore | Routine maintenance tasks that don't modify source or test files. |
+| revert | Reverts a previous commit. |
 
 ## 🔒 Security
 
@@ -110,7 +129,7 @@ Before submitting your changes, ensure:
 
 - **All Tests Pass:** Frontend unit, backend unit, and E2E tests are successful.
 - **New Code Includes Tests:** All new logic and bug fixes are covered by tests.
-- **Linting & Formatting:** `bun run lint:fix` has been run and passes.
+- **Linting & Formatting:** `bun run lint:fix` and `ruff check --fix .` has been run and passes.
 - **Documentation Updated:** `README.md` and `AGENTS.md` are synchronized with changes.
 - **Security:** Input validation is applied to all data received via the JS bridge.
 - **Consistency:** The implementation follows established coding standards and patterns.
@@ -120,4 +139,4 @@ Before submitting your changes, ensure:
 - **Environment Detection:** Use `getattr(sys, 'frozen', False)` in Python to check if the app is running as a packaged executable.
 - **Error Handling:** Always wrap bridge calls in `try...catch` in JS, as backend errors will reject the promise.
 - **Logging:** Use the logger defined in `app/database.py` for backend logs.
-- **Dependency Management:** Use `uv add <package>` for Python and `bun add <package>` for JS. Do not manually edit `pyproject.toml` or `package.json` unless necessary.
+- **Dependency Management:** Use `uv add <package>` for Python (instead of `pip install`) and `bun add <package>` for JS. Do not manually edit `pyproject.toml` or `package.json` unless necessary. Ensure `uv.lock` and `bun.lock` are committed.

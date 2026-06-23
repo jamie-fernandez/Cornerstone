@@ -8,7 +8,7 @@
         "setup": "python3 commands/setup.py",
         "start": "bash commands/start-dev",
         "dev": "vite",
-        "test:app": "pytest app/__tests__/",
+        "test:app": "uv run pytest app/__tests__/",
         "test:ui:unit": "vitest",
         "test:ui:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
         "test:ui:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
