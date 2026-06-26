@@ -5,17 +5,11 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "setup": "python3 commands/setup.py",
-        "start": "bash commands/start-dev",
         "dev": "vite",
-        "test:app": "uv run pytest app/__tests__/",
         "test:ui:unit": "vitest",
         "test:ui:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
         "test:ui:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
-        "lint:fix": "bun x biome check --write",
-        "build": "bash commands/build",
-        "build:mac": "bun run build",
-        "build:win": "bun run build"
+        "lint:fix": "bun x biome check --write"
     },
     "dependencies": {
         "@faker-js/faker": "^10.1.0",

@@ -30,7 +30,7 @@ Cornerstone provides a robust starting point for desktop application development
 Run the following command to install all dependencies and configure virtual environments:
 
 ```bash
-python3 commands/setup.py
+python commands/setup.py
 ```
 
 **What this does:**
@@ -46,6 +46,18 @@ To launch the application in development mode with hot-reload enabled for both f
 bash commands/start-dev
 ```
 
+### ⚡ Using Just (Recommended)
+
+If you have [just](https://github.com/casey/just) installed, you can use these shortcuts:
+
+```bash
+just setup    # Initialize the environment
+just dev      # Start development mode
+just test     # Run all tests
+just lint     # Run linters
+just build    # Build for production
+```
+
 **What to expect:**
 - The Vite development server starts for the Vue frontend.
 - The Python backend launches and opens a `pywebview` window.
@@ -55,16 +67,16 @@ bash commands/start-dev
 
 | Command | Purpose |
 | :--- | :--- |
-| `python3 commands/setup.py` | Initialize the development environment and dependencies. |
-| `bash commands/start-dev` | Start both frontend and backend in development mode. |
-| `bash commands/build` | Build the production assets for both frontend and backend. |
+| `just setup` | Initialize the development environment and dependencies. |
+| `just dev` | Start both frontend and backend in development mode. |
+| `just build` | Build the production assets for both frontend and backend. |
 | `bun run dev` | Start only the Vite development server (frontend). |
 | `bun run test:ui:unit` | Run frontend unit tests using Vitest. |
-| `bun run test:app` | Run backend unit tests using Pytest. |
+| `just test-app` | Run backend unit tests using Pytest. |
 | `bun run test:ui:e2e` | Run end-to-end tests using Cypress. |
 | `bun run lint:fix` | Run Biome to check and fix code formatting/linting. |
-| `bun run build:win` | Package the application as a Windows executable. |
-| `bun run build:mac` | Package the application as a macOS bundle. |
+| `just build-win` | Package the application as a Windows executable. |
+| `just build-mac` | Package the application as a macOS bundle. |
 
 ## Project Structure
 
@@ -106,7 +118,7 @@ bun run test:ui:unit
 
 ### Backend Unit Tests
 ```bash
-bun run test:app
+just test-app
 ```
 
 ### End-to-End Tests
@@ -148,8 +160,8 @@ This will build the Vue frontend, then use PyInstaller (via `commands/build-pyin
 
 ## Troubleshooting
 
-1. **Dependencies:** If you encounter issues, try running `python3 commands/setup.py` again to ensure all tools (Bun, UV) and packages are correctly installed.
-2. **Python Version:** Ensure `python3 --version` reports 3.13 or higher.
+1. **Dependencies:** If you encounter issues, try running `python commands/setup.py` again to ensure all tools (Bun, UV) and packages are correctly installed.
+2. **Python Version:** Ensure `python --version` reports 3.13 or higher.
 3. **Port Conflicts:** The dev server uses port `5173`. Ensure it is available.
 
 ## License

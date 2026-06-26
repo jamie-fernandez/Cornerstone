@@ -24,7 +24,7 @@ merge-request:setup:
   image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
   stage: setup
   script:
-    - python3 .gitlab/merge-request-setup.py
+    - python .gitlab/merge-request-setup.py
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
