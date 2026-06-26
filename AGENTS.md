@@ -8,7 +8,7 @@ The project is hosted on **GitLab**: [https://gitlab.com/jnf-desktop-apps/corner
 
 - **Frontend:** Vue 3, Vite, Vuetify 3, Tailwind CSS 4, Pinia.
 - **Backend:** Python 3.13+, `pywebview`, SQLAlchemy (SQLite).
-- **Tooling:** Bun (JS), UV (Python - **Preferred over pip**), Biome (Linting JS), Ruff (Linting Python), [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local).
+- **Tooling:** Bun (JS), UV (Python - **Preferred over pip**), Biome (Linting JS), Ruff (Linting Python), [just](https://github.com/casey/just) (Command runner), [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local).
 - **Testing:** Vitest (Frontend), Pytest (Backend), Cypress (E2E).
 
 ## 🏗️ Architecture: The Python-JS Bridge
@@ -25,20 +25,20 @@ Cornerstone uses `pywebview` to bridge the Python backend and the Vue frontend.
 ### 1. Initialization
 Always start by ensuring the environment is set up.
 ```bash
-python3 commands/setup.py
+just setup
 ```
 This command handles both `bun install` and `uv sync`.
 
 ### 2. Development
 To start the application with hot-reloading:
 ```bash
-bash commands/start-dev
+just dev
 ```
 Note: This requires both the Vite dev server and the Python process to be running.
 
 ### 3. Testing
 - **Frontend:** `bun run test:ui:unit`
-- **Backend:** `bun run test:app`
+- **Backend:** `just test-app`
 - **E2E:** `bun run test:ui:e2e`
 - **CI Pipelines (Local):** Use [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local) to run and debug GitLab CI jobs locally.
 - **CI Pipelines (Remote):** The `.gitlab-ci.yml` defines stages for `setup` (Merge Request automation), `lint` (Ruff/Biome), `test` (Pytest/Vitest), and `dependabot`. Ensure `SETTINGS__GITLAB_ACCESS_TOKEN` is configured in GitLab CI/CD variables. **Important:** Uncheck the "Protected" flag for this variable if you want the automation to work on Merge Request pipelines from non-protected feature branches.
