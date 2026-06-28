@@ -200,3 +200,8 @@ app/db/
 
 # gitlab-ci-local
 .gitlab-ci-local/*
+
+# AI folders and directories
+.claude/*
+.ai/mcp/*
+.junie/*
