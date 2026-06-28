@@ -11,6 +11,7 @@ stages:
   - setup
   - lint
   - test
+  - build
   - renovate
 
 merge-request:setup:
@@ -48,6 +49,50 @@ test:frontend:
   script:
     - bun install
     - bun run test:ui:unit --run
+
+# Dry-run production builds: verify the app builds on every push, per OS.
+# No `artifacts:` key on purpose — build output is discarded with the runner.
+# macOS is built manually on a local Mac (hosted macOS runners need a paid tier).
+.dry-run:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+build:dry-run:linux:
+  extends: .dry-run
+  image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+  script:
+    # binutils provides objdump, which PyInstaller requires on Linux.
+    - apt-get update && apt-get install -y --no-install-recommends curl unzip binutils
+    - curl -fsSL https://bun.sh/install | bash
+    - export PATH="$HOME/.bun/bin:$PATH"
+    # --ignore-scripts skips lifecycle scripts (e.g. Cypress's postinstall, which
+    # the build doesn't need); build-critical native deps ship prebuilt binaries.
+    - bun install --ignore-scripts
+    - uv sync
+    # Run the build steps directly (not `bash commands/build`) so a failed
+    # PyInstaller step fails the job — the wrapper script exits 0 regardless.
+    - bun run vite build
+    - uv run commands/build-pyinstaller.py
+
+# Windows hosted runner uses PowerShell and can't set `image:`.
+# Run the build steps directly (commands/build-pyinstaller.py is cross-platform).
+#build:dry-run:windows:
+#  extends: .dry-run
+#  tags:
+#    - saas-windows-medium-amd64
+#  script:
+#    - irm bun.sh/install.ps1 | iex
+#    - irm https://astral.sh/uv/install.ps1 | iex
+#    - $env:Path = "$env:USERPROFILE\.bun\bin;$env:USERPROFILE\.local\bin;$env:Path"
+#    # --ignore-scripts avoids Cypress's postinstall, which crashes under bun on Windows.
+#    - bun install --ignore-scripts
+#    - uv sync
+#    - bun run vite build
+#    - uv run commands/build-pyinstaller.py
 
 # Renovate dependency updates for GitLab.
 # Runs the official renovate image as a scheduled (or manual) pipeline; config lives in renovate.json.
