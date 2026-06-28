@@ -7,18 +7,11 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "web"
 
-include:
-  - project: 'dependabot-gitlab/dependabot-standalone'
-    file: 'templates/template.yml'
-    inputs:
-      gitlab_access_token: $SETTINGS__GITLAB_ACCESS_TOKEN
-      github_access_token: $SETTINGS__GITHUB_ACCESS_TOKEN
-
 stages:
   - setup
   - lint
   - test
-  - dependabot
+  - renovate
 
 merge-request:setup:
   image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
@@ -56,13 +49,22 @@ test:frontend:
     - bun install
     - bun run test:ui:unit --run
 
-# Dependabot configuration for GitLab
-# This uses the dependabot-standalone template to run updates via GitLab CI.
-#dependabot:
-#  extends: .dependabot-gitlab
-#  stage: dependabot
-#  rules:
-#    - if: $CI_PIPELINE_SOURCE == "schedule"
-#    - if: $CI_PIPELINE_SOURCE == "web"
-#      when: manual
-#      allow_failure: true
+# Renovate dependency updates for GitLab.
+# Runs the official renovate image as a scheduled (or manual) pipeline; config lives in renovate.json.
+renovate:
+  image: renovate/renovate:latest
+  stage: renovate
+  variables:
+    RENOVATE_PLATFORM: gitlab
+    RENOVATE_AUTODISCOVER: "false"
+    RENOVATE_REPOSITORIES: "$CI_PROJECT_PATH"
+    RENOVATE_TOKEN: $SETTINGS__GITLAB_ACCESS_TOKEN
+    GITHUB_COM_TOKEN: $SETTINGS__GITHUB_ACCESS_TOKEN
+    LOG_LEVEL: info
+  script:
+    - renovate
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: manual
+      allow_failure: true
