@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     api = Api()
 
-    title = f"{CONFIG['NAME'].capitalize()}"
+    title = CONFIG["NAME"]
 
     # Launch the pywebview window
     primary_window = webview.create_window(

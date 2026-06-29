@@ -23,6 +23,22 @@ Cornerstone provides a robust starting point for desktop application development
 - **Bun:** (Will be auto-installed by setup if missing)
 - **UV:** (Will be auto-installed by setup if missing)
 
+## Make It Your Own
+
+After forking, rebrand the template into your own application in one step:
+
+```bash
+just init "My App"                  # rename everything; reset version to 0.1.0
+just init "My App" --clean-examples # also strip placeholder/demo code
+```
+
+This rewrites the project name, slug, version, and description in `pyproject.toml`
+and `package.json`, and updates the docs. The app's identity (window title, built
+executable name, macOS bundle) is derived at runtime from `[tool.app] display-name`
+and `[project] name`/`version` in `pyproject.toml` — the single source of truth — so
+there is nothing else to hand-edit. Afterwards, set an app icon and bundle id,
+choose a `LICENSE`, and point CI at your own repository.
+
 ## Getting Started
 
 ### 1. Setup Development Environment
