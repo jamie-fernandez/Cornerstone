@@ -6,6 +6,10 @@ default:
 
 # --- Core Workflows ---
 
+# Rebrand this template into your own app (e.g. just init "My App" [--clean-examples])
+init *name:
+    python commands/init.py {{name}}
+
 # Initialize development environment (installs Bun, UV, and dependencies)
 setup:
     python commands/setup.py

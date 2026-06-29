@@ -18,3 +18,10 @@ dev = [
     "pre-commit==4.5.0",
     "pyinstaller>=6.17.0",
 ]
+
+[tool.app]
+# Single source of truth for the app's human-facing identity.
+# `[project].name`/`version` above are the package slug and version; this is the
+# display name used for the window title, the built executable, and the macOS
+# bundle. Run `just init "My App"` to set all of these in one step.
+display-name = "Cornerstone"

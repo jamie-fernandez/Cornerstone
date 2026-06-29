@@ -1,14 +1,21 @@
-import subprocess
 import os
 import shutil
+import subprocess
+import sys
 
 
 def build_app():
     print("Starting PyInstaller build...")
 
-    project_root = os.path.dirname(os.path.dirname(__file__))
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Make the app package importable so the build name follows the same
+    # single source of truth as the running app (pyproject.toml -> CONFIG).
+    sys.path.insert(0, project_root)
+    from app.config import CONFIG
+
     UI_dist_dir = os.path.join(project_root, "ui", "dist")
     app_path = os.path.join(project_root, "start.py")
+    pyproject_path = os.path.join(project_root, "pyproject.toml")
 
     dist_dir = os.path.join(project_root, "dist")
     build_dir = os.path.join(project_root, "build")
@@ -33,14 +40,17 @@ def build_app():
         "--clean",
         "--add-data",
         f"{UI_dist_dir}{separator}ui/dist",
+        # Bundle pyproject.toml so the frozen app can read its own identity.
+        "--add-data",
+        f"{pyproject_path}{separator}.",
         "--name",
-        "Cornerstone",
+        CONFIG["NAME"],
         app_path,
     ]
 
     subprocess.run(args, check=True)
 
-    print("PyInstaller build complete.")
+    print(f"PyInstaller build complete: {CONFIG['NAME']}")
 
 
 if __name__ == "__main__":
