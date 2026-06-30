@@ -5,12 +5,59 @@
         ":dependencyDashboard",
         ":semanticCommits"
     ],
+    "assignees": ["FernJam"],
     "labels": ["dependencies"],
     "lockFileMaintenance": { "enabled": true },
+    "constraints": { "python": ">=3.13" },
+    "automerge": true,
+    "platformAutomerge": true,
+    "autoApprove": true,
+    "gitLabIgnoreApprovals": true,
+    "customManagers": [
+        {
+            "customType": "regex",
+            "description": "Track the Python version pinned in .python-version",
+            "managerFilePatterns": ["/(^|/)\\.python-version$/"],
+            "matchStrings": ["(?<currentValue>\\d+\\.\\d+(\\.\\d+)?)"],
+            "depNameTemplate": "python",
+            "datasourceTemplate": "python-version",
+            "versioningTemplate": "python"
+        }
+    ],
     "packageRules": [
         {
             "matchManagers": ["pre-commit"],
             "addLabels": ["pre-commit"]
+        },
+        {
+            "description": "Group all non-major updates (minor, patch, digest, pin) together",
+            "matchUpdateTypes": ["minor", "patch", "digest", "pin"],
+            "groupName": "minor and patch updates",
+            "commitMessageTopic": "minor and patch updates"
+        },
+        {
+            "description": "Group all major updates together",
+            "matchUpdateTypes": ["major"],
+            "groupName": "major updates",
+            "commitMessageTopic": "major updates"
+        },
+        {
+            "description": "Keep GitLab CI image versions in their own group",
+            "matchManagers": ["gitlabci", "gitlabci-include"],
+            "groupName": "CI image versions",
+            "commitMessageTopic": "CI image versions"
+        },
+        {
+            "description": "Keep Bun in its own group",
+            "matchPackageNames": ["oven/bun"],
+            "groupName": "Bun",
+            "commitMessageTopic": "Bun"
+        },
+        {
+            "description": "Keep the Python version (and the uv image that carries it) in its own group",
+            "matchDepNames": ["python", "ghcr.io/astral-sh/uv"],
+            "groupName": "Python",
+            "commitMessageTopic": "Python"
         }
     ]
 }

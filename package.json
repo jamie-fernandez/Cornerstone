@@ -12,30 +12,30 @@
         "lint:fix": "bun x biome check --write"
     },
     "dependencies": {
-        "@faker-js/faker": "^10.1.0",
-        "@fontsource/roboto": "^5.2.8",
-        "@mdi/js": "^7.4.47",
-        "@tailwindcss/vite": "^4.1.17",
-        "@unhead/vue": "^2.0.19",
-        "concurrently": "^9.2.1",
-        "pinia": "^3.0.3",
-        "tailwindcss": "^4.1.17",
-        "unplugin-fonts": "^1.4.0",
-        "vue": "^3.5.22",
-        "vue-router": "^4.6.3",
-        "vuetify": "^3.10.11"
+        "@faker-js/faker": "10.1.0",
+        "@fontsource/roboto": "5.2.8",
+        "@mdi/js": "7.4.47",
+        "@tailwindcss/vite": "4.1.17",
+        "@unhead/vue": "2.0.19",
+        "concurrently": "9.2.1",
+        "pinia": "3.0.3",
+        "tailwindcss": "4.1.17",
+        "unplugin-fonts": "1.4.0",
+        "vue": "3.5.22",
+        "vue-router": "4.6.3",
+        "vuetify": "3.10.11"
     },
     "devDependencies": {
         "@biomejs/biome": "2.5.1",
-        "@vitejs/plugin-vue": "^6.0.1",
-        "@vue/test-utils": "^2.4.6",
-        "cypress": "^15.5.0",
-        "globals": "^16.4.0",
-        "jsdom": "^27.0.1",
+        "@vitejs/plugin-vue": "6.0.1",
+        "@vue/test-utils": "2.4.6",
+        "cypress": "15.5.0",
+        "globals": "16.4.0",
+        "jsdom": "27.0.1",
         "prettier": "3.6.2",
-        "start-server-and-test": "^2.1.2",
-        "vite": "^7.1.11",
-        "vite-plugin-vue-devtools": "^8.0.3",
-        "vitest": "^3.2.4"
+        "start-server-and-test": "2.1.2",
+        "vite": "7.1.11",
+        "vite-plugin-vue-devtools": "8.0.3",
+        "vitest": "3.2.4"
     }
 }
