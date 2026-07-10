@@ -32,7 +32,7 @@
         "cypress": "15.18.1",
         "globals": "17.7.0",
         "jsdom": "29.1.1",
-        "prettier": "3.9.4",
+        "prettier": "3.9.5",
         "start-server-and-test": "3.0.11",
         "vite": "8.1.4",
         "vite-plugin-vue-devtools": "8.1.5",
