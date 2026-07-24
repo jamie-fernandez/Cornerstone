@@ -122,7 +122,7 @@ def get_labels_from_files(files):
             labels.add("build")
 
         # Style
-        if file in ["biome.json", "eslint.config.js", ".pre-commit-config.yaml"]:
+        if file in ["biome.json", ".pre-commit-config.yaml"]:
             labels.add("style")
 
     return list(labels)
