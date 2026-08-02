@@ -205,3 +205,6 @@ app/db/
 .claude/*
 .ai/mcp/*
 .junie/*
+
+# AI context tools
+.codegraph/
