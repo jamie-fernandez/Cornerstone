@@ -109,6 +109,7 @@ cornerstone/
 │   ├── main.js         # Frontend entry point
 │   ├── pages/          # Vue page components
 │   ├── stores/         # Pinia state management
+│   ├── utils/          # Python bridge client & shared helpers
 │   └── __tests__/      # Frontend unit tests
 ├── commands/           # Development & Build scripts
 ├── cypress/            # End-to-end tests
@@ -142,7 +143,10 @@ just test-app
 bun run test:ui:e2e
 ```
 
-### GitLab CI (Local)
+### GitLab CI
+
+Pipelines run lint (Ruff/Biome + `pip-audit`), unit tests with coverage reports (JUnit + Cobertura surfaced in Merge Requests), Cypress E2E, per-OS dry-run builds, and GitLab's Secret-Detection/SAST security scans. Jobs cache dependencies keyed on the lockfiles and skip when a change doesn't touch their stack; scheduled pipelines run Renovate only. Pushing a version tag (e.g. `v0.2.0`) runs the release build and creates a GitLab Release with the Linux bundle attached.
+
 To test and debug GitLab CI pipelines locally, it is recommended to use [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local).
 
 ## GitLab Labels

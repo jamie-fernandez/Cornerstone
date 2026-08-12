@@ -54,6 +54,11 @@ lib-cov
 coverage
 *.lcov
 
+# CI test reports (pytest / vitest coverage & junit output)
+coverage.xml
+pytest-junit.xml
+vitest-junit.xml
+
 # nyc test coverage
 .nyc_output
 
@@ -199,7 +204,7 @@ dist-ssr
 app/db/
 
 # gitlab-ci-local
-.gitlab-ci-local/*
+.gitlab-ci-local/
 
 # AI folders and directories
 .claude/*

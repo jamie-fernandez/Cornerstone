@@ -1,11 +1,17 @@
+import logging
+import platform
+
 import psutil
+from sqlalchemy import text
 
 from app.config import CONFIG
-from app.database import SessionLocal, get_db_path, logger
-# from app.models import *
+from app.database import get_db_path, get_session
+from app.decorators import bridge_method
+
+logger = logging.getLogger(__name__)
 
 
-class Api:
+class API:
     """Python API class that can be called from JavaScript"""
 
     def __init__(self):
@@ -19,9 +25,11 @@ class Api:
         # TODO: add a check to save data before calling destroy()
         self._window.hide()
 
+    @bridge_method
     def get_app_configuration(self):
         return CONFIG
 
+    @bridge_method
     def get_user_data(self):
         """Example API method - returns user data"""
         return {
@@ -31,10 +39,9 @@ class Api:
             ]
         }
 
+    @bridge_method
     def get_system_info(self):
         """Get basic system information"""
-        import platform
-
         return {
             "platform": platform.system(),
             "version": platform.version(),
@@ -42,39 +49,33 @@ class Api:
             "python_version": platform.python_version(),
         }
 
+    @bridge_method
     def get_database_path(self):
         """Get current database path"""
         return {"path": get_db_path()}
 
+    @bridge_method
     def test_database_connection(self):
         """Test database connection"""
-        from sqlalchemy import text
+        with get_session() as db:
+            db.execute(text("SELECT 1"))
+        return {"message": "Database connection OK"}
 
-        try:
-            with SessionLocal() as db:
-                db.execute(text("SELECT 1"))
-            return {"status": "success", "message": "Database connection OK"}
-        except Exception as e:
-            logger.error(f"Database test failed: {e}")
-            return {"status": "error", "message": str(e)}
-
-    # New method for system monitoring using psutil:
+    @bridge_method
     def get_system_stats(self):
         """Get detailed system statistics using psutil"""
-        try:
-            return {
-                "cpu_percent": psutil.cpu_percent(interval=0.1),
-                "memory": {
-                    "total": psutil.virtual_memory().total,
-                    "available": psutil.virtual_memory().available,
-                    "percent_used": psutil.virtual_memory().percent,
-                },
-                "disk": {
-                    "total": psutil.disk_usage("/").total,
-                    "used": psutil.disk_usage("/").used,
-                    "percent_used": psutil.disk_usage("/").percent,
-                },
-            }
-        except Exception as e:
-            logger.error(f"Failed to get system stats: {e}")
-            return {"status": "error", "message": str(e)}
+        memory = psutil.virtual_memory()
+        disk = psutil.disk_usage("/")
+        return {
+            "cpu_percent": psutil.cpu_percent(interval=0.1),
+            "memory": {
+                "total": memory.total,
+                "available": memory.available,
+                "percent_used": memory.percent,
+            },
+            "disk": {
+                "total": disk.total,
+                "used": disk.used,
+                "percent_used": disk.percent,
+            },
+        }

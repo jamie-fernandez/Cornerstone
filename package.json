@@ -7,7 +7,7 @@
     "scripts": {
         "dev": "vite",
         "test:ui:unit": "vitest",
-        "test:ui:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
+        "test:ui:e2e": "start-server-and-test 'vite build && vite preview' http://localhost:4173 'cypress run --e2e'",
         "test:ui:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
         "lint:fix": "bun --bun biome check --write"
     },
@@ -28,6 +28,7 @@
     "devDependencies": {
         "@biomejs/biome": "2.5.5",
         "@vitejs/plugin-vue": "6.0.8",
+        "@vitest/coverage-istanbul": "4.1.10",
         "@vue/test-utils": "2.4.11",
         "cypress": "15.19.0",
         "globals": "17.7.0",

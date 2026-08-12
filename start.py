@@ -5,7 +5,9 @@ import time
 
 import webview
 
-from app import CONFIG, Api
+from app import API, CONFIG
+from app.database import init_db
+
 
 def check_server_is_ready(port, retries=20, delay=1):
     """
@@ -16,7 +18,7 @@ def check_server_is_ready(port, retries=20, delay=1):
             with socket.create_connection(("localhost", port), timeout=1):
                 print(f"Server is ready on port {port}.")
                 return True
-        except (socket.timeout, ConnectionRefusedError):
+        except (TimeoutError, ConnectionRefusedError):
             print(f"Waiting for server on port {port}... (Attempt {i + 1}/{retries})")
             time.sleep(delay)
     return False
@@ -46,7 +48,9 @@ if __name__ == "__main__":
             print("Vue dev server failed to start. Exiting.")
             sys.exit(1)
 
-    api = Api()
+    init_db()
+
+    api = API()
 
     title = CONFIG["NAME"]
 

@@ -1,4 +1,3 @@
-from app.api import Api
-from app.api import CONFIG
+from app.api import API, CONFIG
 
-__all__ = ["Api", "CONFIG"]
+__all__ = ["API", "CONFIG"]
