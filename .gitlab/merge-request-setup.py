@@ -1,9 +1,10 @@
+import json
 import os
 import re
 import sys
-import json
-import urllib.request
+import urllib.error
 import urllib.parse
+import urllib.request
 
 # Configuration from Environment Variables
 GITLAB_API_URL = os.environ.get("CI_API_V4_URL")
@@ -44,7 +45,7 @@ def make_request(method, endpoint, data=None):
     try:
         with urllib.request.urlopen(req) as response:
             return json.loads(response.read().decode("utf-8"))
-    except Exception as e:
+    except (urllib.error.URLError, json.JSONDecodeError, UnicodeDecodeError) as e:
         print(f"Error making request to {url}: {e}")
         return None
 
@@ -107,9 +108,8 @@ def get_labels_from_files(files):
 
         # Testing
         if any(p in file for p in ["/__tests__/", "cypress/"]) or \
-           file.endswith(".test.js") or file.endswith(".spec.js") or \
-           file.startswith("tests/") or file.startswith("test_") or \
-           file.endswith("_test.py"):
+           file.endswith((".test.js", ".spec.js", "_test.py")) or \
+           file.startswith(("tests/", "test_")):
             labels.add("testing")
 
         # CI

@@ -16,9 +16,12 @@ The project is hosted on **GitLab**: [https://gitlab.com/jnf-desktop-apps/corner
 Cornerstone uses `pywebview` to bridge the Python backend and the Vue frontend.
 
 ### How it works:
-1.  **Exposure:** The `Api` class in `app/api.py` is instantiated and passed to `webview.create_window(..., js_api=api)` in `start.py`.
-2.  **Consumption:** In the frontend, all public methods of the `Api` class are available globally via `window.pywebview.api`.
-3.  **Asynchrony:** Calls from JS to Python are asynchronous and return a Promise.
+1.  **Exposure:** The `API` class in `app/api.py` is instantiated and passed to `webview.create_window(..., js_api=api)` in `start.py`.
+2.  **Consumption:** The frontend never touches `window.pywebview.api` directly (it is injected asynchronously). All calls go through `callApi('method_name', ...args)` from `ui/utils/bridge.js`, which waits for the `pywebviewready` event, unwraps the response envelope, and throws `BridgeError` on error envelopes.
+3.  **Asynchrony:** Calls from JS to Python are asynchronous and return a Promise (`callApi` resolves with the unwrapped `data` payload).
+4.  **Response Envelope:** Data-returning API methods are decorated with `@bridge_method` and always return `{"status": "success", "data": ...}` or `{"status": "error", "message": ...}`.
+5.  **Mock Fallback:** When pywebview is not injected (plain-browser `vite dev`, Cypress E2E runs), `callApi` falls back to the mock in `ui/utils/bridge.mock.js`. Keep the mock in sync with the `API` class.
+6.  **Database Lifecycle:** `init_db()` is called explicitly in `start.py` (never at import time). Bridge methods use `get_session()` from `app/database.py` for session-per-call transactions with automatic commit/rollback.
 
 ## 🛠️ Core Workflows
 
@@ -41,18 +44,26 @@ Note: This requires both the Vite dev server and the Python process to be runnin
 - **Backend:** `just test-app`
 - **E2E:** `bun run test:ui:e2e`
 - **CI Pipelines (Local):** Use [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local) to run and debug GitLab CI jobs locally.
-- **CI Pipelines (Remote):** The `.gitlab-ci.yml` defines stages for `setup` (Merge Request automation), `lint` (Ruff/Biome), `test` (Pytest/Vitest), and `dependabot`. Ensure `SETTINGS__GITLAB_ACCESS_TOKEN` is configured in GitLab CI/CD variables. **Important:** Uncheck the "Protected" flag for this variable if you want the automation to work on Merge Request pipelines from non-protected feature branches.
+- **CI Pipelines (Remote):** The `.gitlab-ci.yml` defines stages for `setup` (Merge Request automation), `lint` (Ruff/Biome, `pip-audit`), `test` (Pytest/Vitest with JUnit + Cobertura reports, Cypress E2E, GitLab Secret-Detection/SAST templates), `build` (per-OS dry-run builds), `release` (version tags), and `renovate`. Behavior worth knowing:
+  - Jobs cache deps keyed on `uv.lock`/`bun.lock`, install with `--locked`/`--frozen-lockfile`, and skip when a change doesn't touch their stack (`rules:changes`); `interruptible` cancels superseded pipelines. Scheduled pipelines run Renovate only.
+  - The `cypress/included` image version must match `devDependencies.cypress` in `package.json` (Renovate groups them); its `entrypoint` must stay overridden to `[""]`, and `NODE_OPTIONS=--dns-result-order=ipv4first` is required for `vite preview`/`wait-on` to agree on loopback in containers.
+  - Frontend coverage uses the Istanbul provider, not v8 — v8 needs Node's inspector APIs, but CI runs Vitest under the Bun runtime (the `oven/bun` image has no Node).
+  - Pushing a version tag (e.g. `v0.2.0`) runs the release build and creates a GitLab Release with the Linux bundle attached.
+  - Ensure `SETTINGS__GITLAB_ACCESS_TOKEN` is configured in GitLab CI/CD variables. **Important:** Uncheck the "Protected" flag for this variable if you want the automation to work on Merge Request pipelines from non-protected feature branches.
 
 ## ➕ How to Add a New Feature
 
 To add a feature that requires backend logic:
 
 1.  **Backend (Python):**
-    -   Add a new method to the `Api` class in `app/api.py`.
-    -   If data persistence is needed, define a model in `app/models.py` and use `app/database.py`.
+    -   Add a new method to the `API` class in `app/api.py`, decorated with `@bridge_method`.
+    -   If data persistence is needed, define a model in `app/models.py` and run transactions with `get_session()` from `app/database.py`.
+    -   Only return JSON-serializable data across the bridge; convert ORM objects with `model.to_dict()` (never return ORM instances).
+    -   Raise `BridgeError` for user-facing error messages; unexpected exceptions are logged server-side and return a generic error to JS.
+    -   Mirror the new method in `ui/utils/bridge.mock.js` so browser dev and E2E tests keep working.
 2.  **Frontend (Vue):**
-    -   Call the new method using `window.pywebview.api.yourMethodName()`.
-    -   Example: `const data = await window.pywebview.api.get_system_stats();`
+    -   Call the new method using `callApi('your_method_name')` from `ui/utils/bridge.js`.
+    -   Example: `const stats = await callApi('get_system_stats')` inside `try...catch`; a caught `BridgeError` carries the user-facing Python message.
 3.  **State Management:**
     -   Use Pinia stores in `ui/stores/` to manage the data if it needs to be shared across components.
 
@@ -60,13 +71,16 @@ To add a feature that requires backend logic:
 
 - **Python:** Follow PEP 8. Use **Ruff** for linting.
 - **JavaScript/Vue:** Use **Biome** for formatting and linting.
-- **Communication:** Always use the `window.pywebview.api` bridge for backend communication; avoid direct HTTP calls unless interacting with external services.
+- **Communication:** Always use the `callApi` client (`ui/utils/bridge.js`) for backend communication; avoid direct HTTP calls unless interacting with external services.
 
 ## 📂 Key Files Map
 
 - `start.py`: Application entry point and window configuration.
 - `app/api.py`: The "Brain" - defines the interface between JS and Python.
+- `app/decorators.py`: Bridge decorators (`@bridge_method` response envelope).
+- `app/exceptions.py`: Bridge exception types (`BridgeError` for user-facing messages).
 - `app/models.py`: Database schema definitions.
+- `ui/utils/bridge.js`: Frontend bridge client (`callApi`, bridge-readiness wait, mock fallback).
 - `ui/App.vue`: Root frontend component.
 - `ui/pages/`: Main view components.
 - `commands/`: Utility scripts for setup, build, and deployment.
@@ -99,7 +113,7 @@ To add a feature that requires backend logic:
 
 - **Input Validation:** Always treat data coming from the JS bridge as untrusted. Validate types and values in Python.
 - **Secrets Management:** Never hardcode API keys or credentials. Use environment variables or a secure configuration loader (planned).
-- **JS Bridge Exposure:** Only expose necessary methods in the `Api` class. Avoid exposing sensitive system-level functions directly.
+- **JS Bridge Exposure:** Only expose necessary methods in the `API` class. Avoid exposing sensitive system-level functions directly.
 
 ## 🛠️ Refactoring Best Practices
 
@@ -137,7 +151,7 @@ Before submitting your changes, ensure:
 ## 🤖 Tips for AI Agents
 
 - **Environment Detection:** Use `getattr(sys, 'frozen', False)` in Python to check if the app is running as a packaged executable.
-- **Error Handling:** Always wrap bridge calls in `try...catch` in JS, as backend errors will reject the promise.
+- **Error Handling:** Bridge methods return a `{"status", ...}` envelope, which `callApi` unwraps. Wrap `callApi` calls in `try...catch`: `BridgeError` carries the user-facing Python message; `BridgeUnavailableError` means the bridge or method is missing.
 - **Logging:** Use the logger defined in `app/database.py` for backend logs.
 - **Dependency Management:** Use `uv add <package>` for Python (instead of `pip install`) and `bun add <package>` for JS. Do not manually edit `pyproject.toml` or `package.json` unless necessary. Ensure `uv.lock` and `bun.lock` are committed.
 

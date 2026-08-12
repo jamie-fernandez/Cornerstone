@@ -97,7 +97,7 @@ from app.database import SessionLocal, get_db_path, logger
 # from app.models import *
 
 
-class Api:
+class API:
     """Python API class that can be called from JavaScript"""
 
     def __init__(self):

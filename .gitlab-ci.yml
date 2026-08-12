@@ -1,9 +1,16 @@
+include:
+  # GitLab-managed security scanners. Findings surface as reports in the MR
+  # security widget; the jobs don't fail the pipeline on findings.
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/SAST.gitlab-ci.yml
+
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
     - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "web"
 
@@ -12,7 +19,78 @@ stages:
   - lint
   - test
   - build
+  - release
   - renovate
+
+default:
+  # Auto-cancel superseded pipelines when a newer commit lands on the same ref.
+  interruptible: true
+
+# ---------- Reusable config ----------
+
+# Python jobs: cache uv's download cache (keyed on the lockfile) so `uv sync`
+# only downloads what changed between lockfile updates.
+.python-base:
+  image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+  variables:
+    UV_CACHE_DIR: .uv-cache
+  cache:
+    key:
+      files:
+        - uv.lock
+    paths:
+      - .uv-cache
+
+# Frontend jobs: cache node_modules (keyed on the lockfile).
+.frontend-base:
+  image: oven/bun:1.3
+  cache:
+    key:
+      files:
+        - bun.lock
+    paths:
+      - node_modules
+
+# Path filters: jobs skip when the MR/push doesn't touch their stack.
+.python-paths: &python-paths
+  - app/**/*
+  - commands/**/*
+  - start.py
+  - pyproject.toml
+  - uv.lock
+  - Cornerstone.spec
+  - .gitlab-ci.yml
+
+.frontend-paths: &frontend-paths
+  - ui/**/*
+  - cypress/**/*
+  - public/**/*
+  - index.html
+  - package.json
+  - bun.lock
+  - biome.json
+  - vite.config.js
+  - vitest.config.js
+  - cypress.config.js
+  - .gitlab-ci.yml
+
+# Standard triggers. `push`/`web` sources only — scheduled pipelines are
+# renovate-only, so lint/test/build never fire on the dependency-update schedule.
+.python-rules: &python-rules
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    changes: *python-paths
+  - if: $CI_COMMIT_TAG
+  - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "web"
+    changes: *python-paths
+
+.frontend-rules: &frontend-rules
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    changes: *frontend-paths
+  - if: $CI_COMMIT_TAG
+  - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "web"
+    changes: *frontend-paths
+
+# ---------- Jobs ----------
 
 merge-request:setup:
   image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
@@ -23,32 +101,103 @@ merge-request:setup:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 lint:python:
-  image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+  extends: .python-base
   stage: lint
+  needs: [] # Start immediately; no job outputs are needed from earlier stages.
+  rules: *python-rules
   script:
-    - uv sync
+    - uv sync --locked
     - uv run ruff check .
 
 lint:frontend:
-  image: oven/bun:latest
+  extends: .frontend-base
   stage: lint
+  needs: []
+  rules: *frontend-rules
   script:
-    - bun install
+    - bun install --frozen-lockfile
     - bun x biome check .
 
-test:python:
-  image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
-  stage: test
+# Audit the full locked dependency set (incl. dev) against the PyPA advisory DB.
+audit:python:
+  extends: .python-base
+  stage: lint
+  needs: []
+  rules: *python-rules
   script:
-    - uv sync
-    - uv run pytest app/__tests__/
+    - uv export --locked --format requirements-txt > /tmp/requirements.txt
+    - uvx pip-audit --requirement /tmp/requirements.txt
+
+test:python:
+  extends: .python-base
+  stage: test
+  needs: []
+  rules: *python-rules
+  # Parsed from pytest-cov's term output for the MR coverage badge.
+  coverage: '/TOTAL.*\s+(\d+%)/'
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit: pytest-junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+  script:
+    - uv sync --locked
+    - uv run pytest app/__tests__/ --cov=app --cov-report=term --cov-report=xml --junitxml=pytest-junit.xml
 
 test:frontend:
-  image: oven/bun:latest
+  extends: .frontend-base
   stage: test
+  needs: []
+  rules: *frontend-rules
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit: vitest-junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
   script:
-    - bun install
-    - bun run test:ui:unit --run
+    - bun install --frozen-lockfile
+    - bun run test:ui:unit -- run --coverage --reporter=default --reporter=junit --outputFile.junit=vitest-junit.xml
+
+# Cypress E2E against a production build (vite preview).
+# Image version must match devDependencies.cypress so the baked-in binary is used.
+test:e2e:
+  image:
+    name: cypress/included:15.19.0
+    # The image sets ENTRYPOINT ["cypress"]; without this reset, the runner's
+    # shell script would be passed to the cypress binary as arguments.
+    entrypoint: [""]
+  stage: test
+  needs: []
+  rules: *frontend-rules
+  variables:
+    CYPRESS_INSTALL_BINARY: "0" # Binary is already baked into the image.
+    # In containers, localhost often resolves to ::1 while wait-on connects via
+    # IPv4 (ECONNREFUSED). ipv4first makes vite preview and wait-on agree on 127.0.0.1.
+    # Chrome (Cypress) does its own loopback fallback and is unaffected.
+    NODE_OPTIONS: "--dns-result-order=ipv4first"
+  cache:
+    key:
+      files:
+        - bun.lock
+    paths:
+      - node_modules
+  artifacts:
+    when: on_failure
+    expire_in: 1 week
+    paths:
+      - cypress/screenshots/
+      - cypress/videos/
+  script:
+    # The image ships Node.js; installing bun through npm avoids needing curl/unzip.
+    - npm install --global bun
+    - bun install --frozen-lockfile
+    - bun run test:ui:e2e
 
 # Dry-run production builds: verify the app builds on every push, per OS.
 # No `artifacts:` key on purpose — build output is discarded with the runner.
@@ -57,48 +206,105 @@ test:frontend:
   stage: build
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
-      when: never
-    - if: $CI_COMMIT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "web"
 
 build:dry-run:linux:
   extends: .dry-run
-  image: ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+  image: oven/bun:1.3
+  variables:
+    UV_CACHE_DIR: .uv-cache
+    # Keep uv's managed CPython inside the cached dir — the bun image has no
+    # system Python, so uv downloads one; caching avoids re-downloading per run.
+    UV_PYTHON_INSTALL_DIR: .uv-cache/python
+  cache:
+    - key:
+        files:
+          - bun.lock
+      paths:
+        - node_modules
+    - key:
+        files:
+          - uv.lock
+      paths:
+        - .uv-cache
   script:
-    # binutils provides objdump, which PyInstaller requires on Linux.
-    - apt-get update && apt-get install -y --no-install-recommends curl unzip binutils
-    - curl -fsSL https://bun.sh/install | bash
-    - export PATH="$HOME/.bun/bin:$PATH"
+    # binutils provides objdump, which PyInstaller requires on Linux;
+    # ca-certificates is missing from the bun image and curl needs it for TLS.
+    - apt-get update && apt-get install -y --no-install-recommends curl ca-certificates binutils
+    # uv is a single static binary — cheaper to install here than bun is in the uv image.
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - export PATH="$HOME/.local/bin:$PATH"
     # --ignore-scripts skips lifecycle scripts (e.g. Cypress's postinstall, which
     # the build doesn't need); build-critical native deps ship prebuilt binaries.
-    - bun install --ignore-scripts
-    - uv sync
+    - bun install --frozen-lockfile --ignore-scripts
+    - uv sync --locked
     # Run the build steps directly (not `bash commands/build`) so a failed
     # PyInstaller step fails the job — the wrapper script exits 0 regardless.
     - bun run vite build
     - uv run commands/build-pyinstaller.py
 
 # Windows hosted runner uses PowerShell and can't set `image:`.
-# Run the build steps directly (commands/build-pyinstaller.py is cross-platform).
-#build:dry-run:windows:
-#  extends: .dry-run
-#  tags:
-#    - saas-windows-medium-amd64
-#  script:
-#    - irm bun.sh/install.ps1 | iex
-#    - irm https://astral.sh/uv/install.ps1 | iex
-#    - $env:Path = "$env:USERPROFILE\.bun\bin;$env:USERPROFILE\.local\bin;$env:Path"
-#    # --ignore-scripts avoids Cypress's postinstall, which crashes under bun on Windows.
-#    - bun install --ignore-scripts
-#    - uv sync
-#    - bun run vite build
-#    - uv run commands/build-pyinstaller.py
+# Manual + allow_failure: hosted Windows runners require a paid tier; if no
+# runner picks this up, a blocking auto job would leave pipelines pending forever.
+# Run it manually to verify a Windows build when touching build config.
+build:dry-run:windows:
+  extends: .dry-run
+  when: manual
+  allow_failure: true
+  tags:
+    - saas-windows-medium-amd64
+  script:
+    - irm bun.sh/install.ps1 | iex
+    - irm https://astral.sh/uv/install.ps1 | iex
+    - $env:Path = "$env:USERPROFILE\.bun\bin;$env:USERPROFILE\.local\bin;$env:Path"
+    # --ignore-scripts avoids Cypress's postinstall, which crashes under bun on Windows.
+    - bun install --frozen-lockfile --ignore-scripts
+    - uv sync --locked
+    - bun run vite build
+    - uv run commands/build-pyinstaller.py
+
+# Release builds run on version tags (e.g. `git tag v1.2.0`): same build as the
+# dry-run, but the output is kept and attached to a GitLab Release.
+# Note: GitLab keeps the latest successful pipeline's artifacts per ref by
+# default, so the newest release's download link survives expire_in; older ones
+# eventually lapse. Upload to the package registry if permanence is needed.
+build:release:linux:
+  extends: build:dry-run:linux
+  rules:
+    - if: $CI_COMMIT_TAG
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 30 days
+
+release:
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  stage: release
+  # Don't let a newer pipeline cancel a release mid-creation.
+  interruptible: false
+  needs:
+    - build:release:linux
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - echo "Creating release $CI_COMMIT_TAG"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "Release $CI_COMMIT_TAG"
+    description: "Release $CI_COMMIT_TAG"
+    assets:
+      links:
+        - name: "Cornerstone (Linux x86_64)"
+          url: "$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/download?job=build:release:linux"
+          link_type: package
 
 # Renovate dependency updates for GitLab.
 # Runs the official renovate image as a scheduled (or manual) pipeline; config lives in renovate.json.
 renovate:
-  image: renovate/renovate:latest
+  image: renovate/renovate:44
   stage: renovate
+  needs: [] # Self-contained; don't wait on other stages in manual web pipelines.
+  interruptible: false
   variables:
     RENOVATE_PLATFORM: gitlab
     RENOVATE_AUTODISCOVER: "false"
@@ -113,3 +319,21 @@ renovate:
     - if: $CI_PIPELINE_SOURCE == "web"
       when: manual
       allow_failure: true
+
+# The included security templates run on scheduled pipelines too (they match on
+# $CI_COMMIT_BRANCH, which schedules set). Override their rules so schedules stay
+# renovate-only. If a template ever renames these jobs, this block becomes a
+# scriptless job and pipeline creation fails loudly — delete the stale override.
+secret_detection:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "web"
+
+semgrep-sast:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "web"

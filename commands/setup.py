@@ -127,7 +127,7 @@ def setup():
     except subprocess.CalledProcessError as e:
         print(f"✗ An error occurred during setup: {e}")
         sys.exit(1)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - top-level CLI guard: report any failure and exit
         print(f"✗ An unexpected error occurred: {e}")
         sys.exit(1)
 

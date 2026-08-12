@@ -54,6 +54,12 @@
             "commitMessageTopic": "Bun"
         },
         {
+            "description": "Keep the Cypress CI image in sync with the npm package (CI requires matching versions)",
+            "matchPackageNames": ["cypress", "cypress/included"],
+            "groupName": "Cypress",
+            "commitMessageTopic": "Cypress"
+        },
+        {
             "description": "Keep the Python version (and the uv image that carries it) in its own group",
             "matchDepNames": ["python", "ghcr.io/astral-sh/uv"],
             "groupName": "Python",

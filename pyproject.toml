@@ -17,7 +17,11 @@ dev = [
     "ruff==0.16.00",
     "pre-commit==4.6.1",
     "pyinstaller==6.21.0",
+    "pytest-cov==7.1.0",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
 
 [tool.app]
 # Single source of truth for the app's human-facing identity.
