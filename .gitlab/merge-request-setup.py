@@ -29,15 +29,15 @@ TYPE_TO_LABEL = {
     "revert": "revert",
 }
 
+
 def make_request(method, endpoint, data=None):
     url = f"{GITLAB_API_URL}/projects/{PROJECT_ID}/merge_requests/{MERGE_REQUEST_IID}/{endpoint}"
-    if endpoint == "": # Base Merge Request endpoint
-        url = f"{GITLAB_API_URL}/projects/{PROJECT_ID}/merge_requests/{MERGE_REQUEST_IID}"
+    if endpoint == "":  # Base Merge Request endpoint
+        url = (
+            f"{GITLAB_API_URL}/projects/{PROJECT_ID}/merge_requests/{MERGE_REQUEST_IID}"
+        )
 
-    headers = {
-        "PRIVATE-TOKEN": ACCESS_TOKEN,
-        "Content-Type": "application/json"
-    }
+    headers = {"PRIVATE-TOKEN": ACCESS_TOKEN, "Content-Type": "application/json"}
 
     req_data = json.dumps(data).encode("utf-8") if data else None
     req = urllib.request.Request(url, data=req_data, headers=headers, method=method)
@@ -49,6 +49,7 @@ def make_request(method, endpoint, data=None):
         print(f"Error making request to {url}: {e}")
         return None
 
+
 def lint_title(title):
     print(f"Linting Merge Request title: {title}")
 
@@ -58,7 +59,9 @@ def lint_title(title):
     match = re.match(pattern, title)
 
     if not match:
-        print("Error: Merge Request title does not follow conventional commit format 'type(scope): subject'")
+        print(
+            "Error: Merge Request title does not follow conventional commit format 'type(scope): subject'"
+        )
         print("Note: Ensure there is a space after the colon.")
         sys.exit(1)
 
@@ -84,6 +87,7 @@ def lint_title(title):
     print("Title linting passed!")
     return commit_type, is_breaking
 
+
 def auto_assign():
     if not MERGE_REQUEST_AUTHOR_ID:
         print("Skipping auto-assignment: CI_MERGE_REQUEST_AUTHOR_ID not found.")
@@ -91,6 +95,7 @@ def auto_assign():
 
     print(f"Auto-assigning Merge Request to author (ID: {MERGE_REQUEST_AUTHOR_ID})...")
     make_request("PUT", "", {"assignee_ids": [MERGE_REQUEST_AUTHOR_ID]})
+
 
 def get_labels_from_files(files):
     labels = set()
@@ -107,9 +112,11 @@ def get_labels_from_files(files):
             labels.add("documentation")
 
         # Testing
-        if any(p in file for p in ["/__tests__/", "cypress/"]) or \
-           file.endswith((".test.js", ".spec.js", "_test.py")) or \
-           file.startswith(("tests/", "test_")):
+        if (
+            any(p in file for p in ["/__tests__/", "cypress/"])
+            or file.endswith((".test.js", ".spec.js", "_test.py"))
+            or file.startswith(("tests/", "test_"))
+        ):
             labels.add("testing")
 
         # CI
@@ -117,8 +124,15 @@ def get_labels_from_files(files):
             labels.add("continuous-integration")
 
         # Build
-        if file in ["package.json", "bun.lock", "pyproject.toml", "uv.lock", "Cornerstone.spec", "vite.config.js", "vitest.config.js"] or \
-           file.startswith("commands/"):
+        if file in [
+            "package.json",
+            "bun.lock",
+            "pyproject.toml",
+            "uv.lock",
+            "Cornerstone.spec",
+            "vite.config.js",
+            "vitest.config.js",
+        ] or file.startswith(("cli/", "commands/")):
             labels.add("build")
 
         # Style
@@ -126,6 +140,7 @@ def get_labels_from_files(files):
             labels.add("style")
 
     return list(labels)
+
 
 def auto_label(commit_type, is_breaking):
     # Fetch existing MR to see current labels
@@ -170,11 +185,16 @@ def auto_label(commit_type, is_breaking):
     else:
         print("No new labels to add.")
 
+
 if __name__ == "__main__":
     if not ACCESS_TOKEN:
         print("Error: SETTINGS__GITLAB_ACCESS_TOKEN not set.")
-        print("Tip: If the variable is set in GitLab, ensure the 'Protected' flag is UNCHECKED,")
-        print("otherwise it won't be available to Merge Request pipelines on feature branches.")
+        print(
+            "Tip: If the variable is set in GitLab, ensure the 'Protected' flag is UNCHECKED,"
+        )
+        print(
+            "otherwise it won't be available to Merge Request pipelines on feature branches."
+        )
         sys.exit(1)
 
     if not MERGE_REQUEST_IID:

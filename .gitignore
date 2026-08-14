@@ -207,9 +207,8 @@ app/db/
 .gitlab-ci-local/
 
 # AI folders and directories
-.claude/*
-.ai/mcp/*
-.junie/*
+.claude/
+.junie/
 
 # AI context tools
 .codegraph/

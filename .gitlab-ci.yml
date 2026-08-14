@@ -54,7 +54,7 @@ default:
 # Path filters: jobs skip when the MR/push doesn't touch their stack.
 .python-paths: &python-paths
   - app/**/*
-  - commands/**/*
+  - cli/**/*
   - start.py
   - pyproject.toml
   - uv.lock
@@ -125,7 +125,7 @@ audit:python:
   needs: []
   rules: *python-rules
   script:
-    - uv export --locked --format requirements-txt > /tmp/requirements.txt
+    - uv export --locked --no-emit-project --format requirements-txt > /tmp/requirements.txt
     - uvx pip-audit --requirement /tmp/requirements.txt
 
 test:python:
@@ -145,7 +145,7 @@ test:python:
         path: coverage.xml
   script:
     - uv sync --locked
-    - uv run pytest app/__tests__/ --cov=app --cov-report=term --cov-report=xml --junitxml=pytest-junit.xml
+    - uv run pytest app/__tests__/ cli/__tests__/ --cov=app --cov=cli --cov-report=term --cov-report=xml --junitxml=pytest-junit.xml
 
 test:frontend:
   extends: .frontend-base
@@ -238,10 +238,10 @@ build:dry-run:linux:
     # the build doesn't need); build-critical native deps ship prebuilt binaries.
     - bun install --frozen-lockfile --ignore-scripts
     - uv sync --locked
-    # Run the build steps directly (not `bash commands/build`) so a failed
-    # PyInstaller step fails the job — the wrapper script exits 0 regardless.
+    # Run the build steps directly (not `python3 commands/build.py`) so each
+    # step's output stays explicit in the job log.
     - bun run vite build
-    - uv run commands/build-pyinstaller.py
+    - uv run python -m cli.commands.build_pyinstaller
 
 # Windows hosted runner uses PowerShell and can't set `image:`.
 # Manual + allow_failure: hosted Windows runners require a paid tier; if no
@@ -261,7 +261,7 @@ build:dry-run:windows:
     - bun install --frozen-lockfile --ignore-scripts
     - uv sync --locked
     - bun run vite build
-    - uv run commands/build-pyinstaller.py
+    - uv run python -m cli.commands.build_pyinstaller
 
 # Release builds run on version tags (e.g. `git tag v1.2.0`): same build as the
 # dry-run, but the output is kept and attached to a GitLab Release.
