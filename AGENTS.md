@@ -30,16 +30,33 @@ Always start by ensuring the environment is set up.
 ```bash
 just setup
 ```
+
+Or directly via the CLI:
+
+```bash
+uv run stone setup  # or python3 -m cli setup
+```
 This command handles both `bun install` and `uv sync`.
 
 ### 2. Development
 To start the application with hot-reloading:
 ```bash
 just dev
+# or via CLI aliases:
+uv run stone dev    # or 'stone dev' when venv active
 ```
 Note: This requires both the Vite dev server and the Python process to be running.
 
-### 3. Testing
+### 3. Direct CLI Invocations
+
+The project defines `cornerstone` and `stone` entrypoints in `pyproject.toml` (`[project.scripts]`).
+
+- Run with UV: `uv run stone <command>`
+- Run in active venv: `stone <command>`
+- Global editable tool install: `uv tool install --editable .` -> `stone <command>` from anywhere.
+- Rebrand with custom aliases: `uv run stone init "My App" --alias stone -a myapp`
+
+### 4. Testing
 - **Frontend:** `bun run test:ui:unit`
 - **Backend:** `just test-app`
 - **E2E:** `bun run test:ui:e2e`
@@ -76,6 +93,8 @@ To add a feature that requires backend logic:
 ## 📂 Key Files Map
 
 - `start.py`: Application entry point and window configuration.
+- `cli/`: Unified Typer CLI package for application operations, dev tools, interactive documentation, and database
+  management.
 - `app/api.py`: The "Brain" - defines the interface between JS and Python.
 - `app/decorators.py`: Bridge decorators (`@bridge_method` response envelope).
 - `app/exceptions.py`: Bridge exception types (`BridgeError` for user-facing messages).
@@ -83,7 +102,6 @@ To add a feature that requires backend logic:
 - `ui/utils/bridge.js`: Frontend bridge client (`callApi`, bridge-readiness wait, mock fallback).
 - `ui/App.vue`: Root frontend component.
 - `ui/pages/`: Main view components.
-- `commands/`: Utility scripts for setup, build, and deployment.
 
 ## 📝 Documentation Updates
 
@@ -92,22 +110,22 @@ To add a feature that requires backend logic:
 
 ## 🏷️ GitLab Labels
 
-| Label | Description |
-|---|---|
-| frontend | Changes related to the Vue.js frontend (ui/ directory). |
-| backend | Changes related to the Python backend (app/ directory or start.py file). |
-| feature | A new feature for the user; aligns with a MINOR version bump in semver. |
-| fix | A bug fix for the user; aligns with a PATCH version bump in semver. |
-| breaking-change | A change that breaks backward compatibility; aligns with a MAJOR version bump in semver. |
-| documentation | Changes to documentation only, with no effect on code behavior. |
-| style | Formatting or whitespace changes that don't affect code logic. |
-| refactor | A code change that neither fixes a bug nor adds a feature. |
-| performance | A code change that improves performance. |
-| testing | Adding or correcting tests, with no changes to production code. |
-| build | Changes to the build system or external dependencies. |
-| continuous-integration | Changes to CI configuration files and scripts. |
-| chore | Routine maintenance tasks that don't modify source or test files. |
-| revert | Reverts a previous commit. |
+| Label                  | Description                                                                              |
+|------------------------|------------------------------------------------------------------------------------------|
+| frontend               | Changes related to the Vue.js frontend (ui/ directory).                                  |
+| backend                | Changes related to the Python backend (app/ directory or start.py file).                 |
+| feature                | A new feature for the user; aligns with a MINOR version bump in semver.                  |
+| fix                    | A bug fix for the user; aligns with a PATCH version bump in semver.                      |
+| breaking-change        | A change that breaks backward compatibility; aligns with a MAJOR version bump in semver. |
+| documentation          | Changes to documentation only, with no effect on code behavior.                          |
+| style                  | Formatting or whitespace changes that don't affect code logic.                           |
+| refactor               | A code change that neither fixes a bug nor adds a feature.                               |
+| performance            | A code change that improves performance.                                                 |
+| testing                | Adding or correcting tests, with no changes to production code.                          |
+| build                  | Changes to the build system or external dependencies.                                    |
+| continuous-integration | Changes to CI configuration files and scripts.                                           |
+| chore                  | Routine maintenance tasks that don't modify source or test files.                        |
+| revert                 | Reverts a previous commit.                                                               |
 
 ## 🔒 Security
 
@@ -154,33 +172,3 @@ Before submitting your changes, ensure:
 - **Error Handling:** Bridge methods return a `{"status", ...}` envelope, which `callApi` unwraps. Wrap `callApi` calls in `try...catch`: `BridgeError` carries the user-facing Python message; `BridgeUnavailableError` means the bridge or method is missing.
 - **Logging:** Use the logger defined in `app/database.py` for backend logs.
 - **Dependency Management:** Use `uv add <package>` for Python (instead of `pip install`) and `bun add <package>` for JS. Do not manually edit `pyproject.toml` or `package.json` unless necessary. Ensure `uv.lock` and `bun.lock` are committed.
-
-<!-- CODEGRAPH_START -->
-## CodeGraph
-
-In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it BEFORE grep/find or reading files when you need to understand or locate code:
-
-- **MCP tool** (when available): `codegraph_explore` answers most code questions in one call — the relevant symbols' verbatim source plus the call paths between them, including dynamic-dispatch hops grep can't follow. Name a file or symbol in the query to read its current line-numbered source. If it's listed but deferred, load it by name via tool search.
-- **Shell** (always works): `codegraph explore "<symbol names or question>"` prints the same output.
-
-If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
-<!-- CODEGRAPH_END -->
-
-<!-- context7 -->
-Use the `ctx7` CLI to fetch current documentation whenever the user asks about a library, framework, SDK, API, CLI tool, or cloud service — even well-known ones like React, Next.js, Prisma, Express, Tailwind, Django, or Spring Boot. This includes API syntax, configuration, version migration, library-specific debugging, setup instructions, and CLI tool usage. Use even when you think you know the answer — your training data may not reflect recent changes. Prefer this over web search for library docs.
-
-Do not use for: refactoring, writing scripts from scratch, debugging business logic, code review, or general programming concepts.
-
-## Steps
-
-1. Resolve library: `bunx ctx7@latest library <name> "<what to look up>"` — use the official library name with proper punctuation (e.g., "Next.js" not "nextjs", "Customer.io" not "customerio", "Three.js" not "threejs")
-2. Pick the best match (ID format: `/org/project`) by: exact name match, description relevance, code snippet count, source reputation (High/Medium preferred), and benchmark score (higher is better). If results don't look right, try alternate names or queries (e.g., "next.js" not "nextjs", or rephrase the question)
-3. Fetch docs: `bunx ctx7@latest docs <libraryId> "<what to look up>"` — run a separate `docs` command per distinct concept if the question spans multiple topics, unless it's about how they interact
-4. Answer using the fetched documentation
-
-You MUST call `library` first to get a valid ID unless the user provides one directly in `/org/project` format. Be specific about what to look up in the library's documentation — specific and detailed queries return better results than vague single words, but keep each query to a single concept unless the question is about how concepts interact; combined multi-topic queries dilute ranking and return shallow results for each topic. Do not run more than 3 commands per question. Do not include sensitive information (API keys, passwords, credentials) in queries.
-
-For version-specific docs, use `/org/project/version` from the `library` output (e.g., `/vercel/next.js/v14.3.0`).
-
-If a command fails with a quota error, inform the user and suggest `bunx ctx7@latest login` or setting `CONTEXT7_API_KEY` env var for higher limits. Do not silently fall back to training data.
-<!-- context7 -->

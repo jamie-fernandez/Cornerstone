@@ -8,27 +8,35 @@ default:
 
 # Rebrand this template into your own app (e.g. just init "My App" [--clean-examples])
 init *name:
-    python commands/init.py {{name}}
+    python3 -m cli init {{name}}
 
 # Initialize development environment (installs Bun, UV, and dependencies)
 setup:
-    python commands/setup.py
+    python3 -m cli setup
 
 # Start application with hot-reloading
 dev:
-    bash commands/start-dev
+    python3 -m cli dev
 
 # Alias for 'dev'
 start: dev
 
+# Run the application CLI (e.g. just cli --help, just cli db info)
+cli *args:
+    uv run python -m cli {{args}}
+
 # --- Quality Control ---
 
-# Run all unit tests (backend and frontend)
-test: test-app test-ui
+# Run all unit tests (backend, cli, and frontend)
+test: test-app test-cli test-ui
 
 # Run backend Python tests (Pytest)
 test-app:
     uv run pytest app/__tests__/
+
+# Run CLI tests (Pytest)
+test-cli:
+    uv run pytest cli/__tests__/
 
 # Run frontend Vue unit tests (Vitest)
 test-ui:
@@ -56,7 +64,7 @@ lint-fix:
 
 # Build the application for production
 build:
-    bash commands/build
+    python3 -m cli build
 
 # Alias for 'build' (platform specific commands can be added here later)
 build-mac: build
@@ -70,4 +78,4 @@ ci task="":
 
 # Clean build artifacts
 clean:
-    rm -rf dist/
+    python3 -m cli clean
