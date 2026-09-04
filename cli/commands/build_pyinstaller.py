@@ -23,6 +23,8 @@ def build_app():
     ui_dist_dir = os.path.join(PROJECT_ROOT, "ui", "dist")
     app_path = os.path.join(PROJECT_ROOT, "start.py")
     pyproject_path = os.path.join(PROJECT_ROOT, "pyproject.toml")
+    alembic_ini_path = os.path.join(PROJECT_ROOT, "alembic.ini")
+    migrations_dir = os.path.join(PROJECT_ROOT, "app", "migrations")
 
     dist_dir = os.path.join(PROJECT_ROOT, "dist")
     build_dir = os.path.join(PROJECT_ROOT, "build")
@@ -57,6 +59,13 @@ def build_app():
         # Bundle pyproject.toml so the frozen app can read its own identity.
         "--add-data",
         f"{pyproject_path}{separator}.",
+        # Bundle Alembic configuration and migration scripts.
+        "--add-data",
+        f"{alembic_ini_path}{separator}.",
+        "--add-data",
+        f"{migrations_dir}{separator}app/migrations",
+        "--hidden-import",
+        "alembic",
         "--name",
         CONFIG["NAME"],
         app_path,
