@@ -119,7 +119,12 @@ uv run stone stats              # Display system metrics and resource usage
 uv run stone clean              # Clean up build artifacts (dist, build, ui/dist, *.spec)
 uv run stone db info            # Inspect SQLite database status, size, and tables
 uv run stone db test            # Test database connectivity
-uv run stone db init            # Initialize schema and verify tables
+uv run stone db init            # Initialize schema and run migrations
+uv run stone db migrate -m "create_users_table" # Generate a new sequential migration revision
+uv run stone db upgrade         # Apply pending migrations to head
+uv run stone db downgrade       # Revert previous migration revision
+uv run stone db current         # Inspect current migration revision (e.g. 0001)
+uv run stone db history         # View chronological migration history
 uv run stone db tables          # List database schema and column details
 uv run stone db query "SELECT 1"# Run a raw SQL query (supports --json)
 uv run stone db reset --yes     # Reset and re-create database file
@@ -129,10 +134,12 @@ uv run stone db reset --yes     # Reset and re-create database file
 
 ```text
 cornerstone/
+├── alembic.ini         # Alembic migration configuration
 ├── app/                # Python Backend
 │   ├── api.py          # JS-exposed API classes
 │   ├── config.py       # Backend configuration
 │   ├── database.py     # Database & SQLAlchemy setup
+│   ├── migrations/     # Database schema migrations & versions
 │   ├── models.py       # Database models
 │   └── __tests__/      # Backend unit tests
 ├── cli/                # Application CLI and Developer Tools

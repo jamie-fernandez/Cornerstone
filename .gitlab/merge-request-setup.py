@@ -43,9 +43,14 @@ def make_request(method, endpoint, data=None):
     req = urllib.request.Request(url, data=req_data, headers=headers, method=method)
 
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=30) as response:
             return json.loads(response.read().decode("utf-8"))
-    except (urllib.error.URLError, json.JSONDecodeError, UnicodeDecodeError) as e:
+    except (
+        urllib.error.URLError,
+        json.JSONDecodeError,
+        UnicodeDecodeError,
+        TimeoutError,
+    ) as e:
         print(f"Error making request to {url}: {e}")
         return None
 

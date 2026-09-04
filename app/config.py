@@ -23,6 +23,8 @@ logging.basicConfig(
     level=logging.INFO if DEBUG else logging.WARNING,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
+logging.getLogger("alembic").setLevel(logging.WARNING)
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 
 def _pyproject_path():

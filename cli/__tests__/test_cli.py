@@ -287,3 +287,97 @@ class TestDbCommands:
         )
         assert result.exit_code == 1
         assert "SQL execution failed" in result.stdout
+
+    def test_db_current(self, temp_db):
+        result = runner.invoke(app, ["db", "current", "--db-path", temp_db])
+        assert result.exit_code == 0
+        assert "Database Migration State" in result.stdout
+        assert "Current Revision" in result.stdout
+
+    def test_db_current_json(self, temp_db):
+        result = runner.invoke(app, ["db", "current", "--db-path", temp_db, "--json"])
+        assert result.exit_code == 0
+        data = json.loads(result.stdout)
+        assert "revision" in data
+        assert "head" in data
+        assert "is_head" in data
+        assert data["is_head"] is True
+
+    def test_db_history(self):
+        result = runner.invoke(app, ["db", "history"])
+        assert result.exit_code == 0
+        assert "Migration Revision History" in result.stdout
+
+        verbose_result = runner.invoke(app, ["db", "history", "--verbose"])
+        assert verbose_result.exit_code == 0
+        assert "Branch Labels" in verbose_result.stdout
+
+    def test_db_history_json(self):
+        result = runner.invoke(app, ["db", "history", "--json"])
+        assert result.exit_code == 0
+        data = json.loads(result.stdout)
+        assert isinstance(data, list)
+        assert len(data) >= 1
+        assert "revision" in data[0]
+        assert "message" in data[0]
+
+    def test_db_downgrade_and_upgrade(self, temp_db):
+        downgrade_res = runner.invoke(
+            app, ["db", "downgrade", "base", "--db-path", temp_db]
+        )
+        assert downgrade_res.exit_code == 0
+        assert "Database downgraded to revision" in downgrade_res.stdout
+
+        current_res = runner.invoke(
+            app, ["db", "current", "--db-path", temp_db, "--json"]
+        )
+        assert current_res.exit_code == 0
+        assert json.loads(current_res.stdout)["revision"] is None
+
+        upgrade_res = runner.invoke(
+            app, ["db", "upgrade", "head", "--db-path", temp_db]
+        )
+        assert upgrade_res.exit_code == 0
+        assert "Database upgraded to revision" in upgrade_res.stdout
+
+        current_res2 = runner.invoke(
+            app, ["db", "current", "--db-path", temp_db, "--json"]
+        )
+        assert current_res2.exit_code == 0
+        assert json.loads(current_res2.stdout)["is_head"] is True
+
+    def test_db_stamp(self, temp_db):
+        stamp_res = runner.invoke(app, ["db", "stamp", "base", "--db-path", temp_db])
+        assert stamp_res.exit_code == 0
+        assert "Stamped database" in stamp_res.stdout
+
+        stamp_head = runner.invoke(app, ["db", "stamp", "head", "--db-path", temp_db])
+        assert stamp_head.exit_code == 0
+        assert "Stamped database" in stamp_head.stdout
+
+    def test_db_migrate_and_revision_alias(self, temp_db, monkeypatch):
+        class MockScript:
+            revision = "abc123mock"
+            path = "/path/to/migration.py"
+
+        from alembic import command
+
+        monkeypatch.setattr(
+            command,
+            "revision",
+            lambda *args, **kwargs: MockScript(),
+        )
+
+        res_migrate = runner.invoke(
+            app,
+            ["db", "migrate", "-m", "test migration", "--db-path", temp_db],
+        )
+        assert res_migrate.exit_code == 0
+        assert "Created migration revision: abc123mock" in res_migrate.stdout
+
+        res_rev = runner.invoke(
+            app,
+            ["db", "revision", "-m", "alias test", "--db-path", temp_db],
+        )
+        assert res_rev.exit_code == 0
+        assert "Created migration revision: abc123mock" in res_rev.stdout

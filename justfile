@@ -58,7 +58,7 @@ lint:
 # Run all linters and apply automatic fixes
 lint-fix:
     bun run lint:fix
-    uv run ruff check --fix .
+    uv run ruff check --fix .; uv run ruff format .
 
 # --- Build ---
 

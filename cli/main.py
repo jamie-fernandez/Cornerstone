@@ -242,7 +242,7 @@ def dev_command():
 
     [bold green]Examples:[/bold green]
       [cyan]$ python3 -m cli dev[/cyan]                      # Start the Vite dev server and launch the desktop window
-      [cyan]$ just dev[/cyan]                              # Shortcut alias via just command runner
+      [cyan]$ just dev[/cyan]                                # Shortcut alias via just command runner
 
     [bold yellow]Notes:[/bold yellow]
       Ensure dependencies are installed first (`python3 -m cli setup`). Press Ctrl+C in the terminal to gracefully stop both servers.
@@ -265,7 +265,7 @@ def build_command():
 
     [bold green]Examples:[/bold green]
       [cyan]$ python3 -m cli build[/cyan]                    # Build frontend assets into dist/ and generate the standalone desktop executable
-      [cyan]$ just build[/cyan]                            # Shortcut alias via just command runner
+      [cyan]$ just build[/cyan]                              # Shortcut alias via just command runner
 
     [bold yellow]Notes:[/bold yellow]
       Outputs are written to the 'dist/' directory. Requires PyInstaller and Bun to be available.
@@ -304,7 +304,7 @@ def clean_command(
       [cyan]$ python3 -m cli clean[/cyan]                    # Remove all build artifacts and temporary files
       [cyan]$ python3 -m cli clean --dry-run[/cyan]          # Preview build artifacts to delete without removing them
       [cyan]$ python3 -m cli clean --json[/cyan]             # Output clean results as structured JSON
-      [cyan]$ just clean[/cyan]                            # Shortcut alias via just command runner
+      [cyan]$ just clean[/cyan]                              # Shortcut alias via just command runner
 
     [bold yellow]Notes:[/bold yellow]
       Deletes 'dist/', 'build/', 'ui/dist/', and PyInstaller '.spec' files from the project root.
@@ -324,7 +324,7 @@ def setup_command():
 
     [bold green]Examples:[/bold green]
       [cyan]$ python3 -m cli setup[/cyan]                    # Check for Bun and UV, install if missing, and sync all packages
-      [cyan]$ just setup[/cyan]                            # Shortcut alias via just command runner
+      [cyan]$ just setup[/cyan]                              # Shortcut alias via just command runner
 
     [bold yellow]Notes:[/bold yellow]
       Idempotent: safe to re-run whenever package.json or pyproject.toml changes.

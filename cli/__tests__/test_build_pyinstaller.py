@@ -59,3 +59,4 @@ class TestBuildApp:
         assert any(
             "pyproject.toml" in d and d.endswith(f"{separator}.") for d in add_data
         )
+        assert any(d.endswith(f"{separator}app/migrations") for d in add_data)
