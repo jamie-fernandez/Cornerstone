@@ -43,7 +43,7 @@ def db_migrate_command(
         bool,
         typer.Option(
             "--autogenerate/--no-autogenerate",
-            help="Autogenerate migration operations from models.",
+            help="Autogenerate migration operations from SQLAlchemy ORM models.",
         ),
     ] = True,
     rev_id: Annotated[
@@ -64,13 +64,13 @@ def db_migrate_command(
     ] = None,
 ):
     """
-    Generate a new Alembic migration revision script.
+    Generate a new Alembic migration revision script from SQLAlchemy models.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db migrate -m "create_users_table"[/cyan]
-      [cyan]$ python3 -m cli db migrate -m "add_avatar_url_to_users"[/cyan]
-      [cyan]$ python3 -m cli db migrate -m "manual empty migration" --no-autogenerate[/cyan]
-      [cyan]$ python3 -m cli db migrate -p ./custom.db -m "schema update"[/cyan]
+      [cyan]$ stone db migrate -m "create_users_table"[/cyan]
+      [cyan]$ stone db migrate -m "add_avatar_url_to_users"[/cyan]
+      [cyan]$ stone db migrate -m "manual empty migration" --no-autogenerate[/cyan]
+      [cyan]$ stone db migrate -p ./custom.db -m "schema update"[/cyan]
     """
     path = db_path or get_db_path()
     try:
@@ -106,7 +106,7 @@ def db_revision_command(
         bool,
         typer.Option(
             "--autogenerate/--no-autogenerate",
-            help="Autogenerate migration operations from models.",
+            help="Autogenerate migration operations from SQLAlchemy ORM models.",
         ),
     ] = True,
     rev_id: Annotated[
@@ -135,7 +135,7 @@ def db_upgrade_command(
     revision: Annotated[
         str,
         typer.Argument(
-            help="Target revision identifier (e.g. 'head', '+1', or revision ID like '0002').",
+            help="Target Alembic revision identifier (e.g. 'head', '+1', or revision ID like '0002').",
         ),
     ] = "head",
     db_path: Annotated[
@@ -151,10 +151,10 @@ def db_upgrade_command(
     Apply database schema migrations forward up to the specified target revision.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db upgrade[/cyan]             # Upgrade to head
-      [cyan]$ python3 -m cli db upgrade +1[/cyan]          # Upgrade one revision
-      [cyan]$ python3 -m cli db upgrade 0002[/cyan]        # Upgrade to specific revision
-      [cyan]$ python3 -m cli db upgrade -p ./app.db head[/cyan]
+      [cyan]$ stone db upgrade[/cyan]             # Upgrade to head
+      [cyan]$ stone db upgrade +1[/cyan]          # Upgrade one revision
+      [cyan]$ stone db upgrade 0002[/cyan]        # Upgrade to specific revision
+      [cyan]$ stone db upgrade -p ./app.db head[/cyan]
     """
     path = db_path or get_db_path()
     try:
@@ -173,7 +173,7 @@ def db_downgrade_command(
     revision: Annotated[
         str,
         typer.Argument(
-            help="Target revision identifier (e.g. '-1', 'base', or revision ID like '0001').",
+            help="Target Alembic revision identifier (e.g. '-1', 'base', or revision ID like '0001').",
         ),
     ] = "-1",
     db_path: Annotated[
@@ -189,9 +189,9 @@ def db_downgrade_command(
     Revert database schema migrations backward to the specified target revision.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db downgrade[/cyan]             # Revert 1 revision (-1)
-      [cyan]$ python3 -m cli db downgrade base[/cyan]        # Revert all migrations
-      [cyan]$ python3 -m cli db downgrade -p ./app.db -1[/cyan]
+      [cyan]$ stone db downgrade[/cyan]             # Revert 1 revision (-1)
+      [cyan]$ stone db downgrade base[/cyan]        # Revert all migrations
+      [cyan]$ stone db downgrade -p ./app.db -1[/cyan]
     """
     path = db_path or get_db_path()
     try:
@@ -224,9 +224,9 @@ def db_current_command(
     Display current database migration revision, head revision, and status.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db current[/cyan]
-      [cyan]$ python3 -m cli db current --json[/cyan]
-      [cyan]$ python3 -m cli db current -p ./data/app.db[/cyan]
+      [cyan]$ stone db current[/cyan]
+      [cyan]$ stone db current --json[/cyan]
+      [cyan]$ stone db current -p ./data/app.db[/cyan]
     """
     path = db_path or get_db_path()
     try:
@@ -290,9 +290,9 @@ def db_history_command(
     Display chronological migration revision history and descriptions.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db history[/cyan]
-      [cyan]$ python3 -m cli db history --verbose[/cyan]
-      [cyan]$ python3 -m cli db history --json[/cyan]
+      [cyan]$ stone db history[/cyan]
+      [cyan]$ stone db history --verbose[/cyan]
+      [cyan]$ stone db history --json[/cyan]
     """
     try:
         alembic_cfg = get_alembic_config()
@@ -361,7 +361,7 @@ def db_stamp_command(
     revision: Annotated[
         str,
         typer.Argument(
-            help="Target revision to stamp (e.g. 'head', 'base', or revision hash).",
+            help="Target Alembic revision to stamp (e.g. 'head', 'base', or revision ID).",
         ),
     ] = "head",
     db_path: Annotated[
@@ -374,13 +374,13 @@ def db_stamp_command(
     ] = None,
 ):
     """
-    Stamp the database revision table with a specific revision without executing migrations.
+    Stamp the Alembic database revision table with a specific revision without executing migrations.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db stamp head[/cyan]
-      [cyan]$ python3 -m cli db stamp base[/cyan]
-      [cyan]$ python3 -m cli db stamp 0001[/cyan]
-      [cyan]$ python3 -m cli db stamp -p ./custom.db head[/cyan]
+      [cyan]$ stone db stamp head[/cyan]
+      [cyan]$ stone db stamp base[/cyan]
+      [cyan]$ stone db stamp 0001[/cyan]
+      [cyan]$ stone db stamp -p ./custom.db head[/cyan]
     """
     path = db_path or get_db_path()
     try:

@@ -12,7 +12,7 @@ description = ""
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "alembic>=1.19.1",
+    "alembic==1.19.1",
     "platformdirs==4.11.3",
     "psutil==7.2.2",
     "pywebview==6.2.1",
@@ -22,7 +22,6 @@ dependencies = [
 ]
 
 [project.scripts]
-cornerstone = "cli:app"
 stone = "cli:app"
 
 [dependency-groups]
@@ -32,7 +31,11 @@ dev = [
     "pre-commit==4.6.1",
     "pyinstaller==6.21.0",
     "pytest-cov==7.1.0",
+    "yq==4.1.2",
 ]
+
+[tool.ruff.lint]
+ignore = ["D210"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

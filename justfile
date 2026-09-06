@@ -1,5 +1,8 @@
 set shell := ["bash", "-c"]
 
+# Dynamically resolve the primary CLI script name from pyproject.toml
+cli := `uv run tomlq -r '.project.scripts | keys[0]' pyproject.toml`
+
 # Default recipe: list all available commands
 default:
     @just --list
@@ -8,15 +11,23 @@ default:
 
 # Rebrand this template into your own app (e.g. just init "My App" [--clean-examples])
 init *name:
-    python3 -m cli init {{name}}
+    {{cli}} init {{name}}
 
 # Initialize development environment (installs Bun, UV, and dependencies)
 setup:
-    python3 -m cli setup
+    {{cli}} setup
+
+# Run environment and dependency diagnostics
+doctor:
+    {{cli}} doctor
+
+# Install git pre-commit hooks (Ruff and Biome on staged files)
+setup-hooks:
+    {{cli}} hooks install
 
 # Start application with hot-reloading
 dev:
-    python3 -m cli dev
+    {{cli}} dev
 
 # Alias for 'dev'
 start: dev
@@ -64,7 +75,7 @@ lint-fix:
 
 # Build the application for production
 build:
-    python3 -m cli build
+    {{cli}} build
 
 # Alias for 'build' (platform specific commands can be added here later)
 build-mac: build
@@ -78,4 +89,4 @@ ci task="":
 
 # Clean build artifacts
 clean:
-    python3 -m cli clean
+    {{cli}} clean

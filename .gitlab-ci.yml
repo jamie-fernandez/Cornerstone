@@ -6,6 +6,8 @@ include:
 
 workflow:
   rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TITLE =~ /^(\[Draft\]|\(Draft\)|Draft:|draft:)/
+      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
@@ -239,7 +241,7 @@ build:dry-run:linux:
     # the build doesn't need); build-critical native deps ship prebuilt binaries.
     - bun install --frozen-lockfile --ignore-scripts
     - uv sync --locked
-    # Run the build steps directly (not `python3 commands/build.py`) so each
+    # Run the build steps directly (not `python commands/build.py`) so each
     # step's output stays explicit in the job log.
     - bun run vite build
     - uv run python -m cli.commands.build_pyinstaller

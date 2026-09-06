@@ -187,11 +187,11 @@ def setup() -> None:
             bold=True,
         )
         typer.echo(
-            f'You can now run "{typer.style("uv run stone dev", fg=typer.colors.CYAN, bold=True)}" or activate your venv.'
+            f'You can now run "{typer.style("stone dev", fg=typer.colors.CYAN, bold=True)}" or activate your venv.'
         )
         typer.echo("\nCLI invocation options:")
         typer.echo(
-            f"  • With UV:           {typer.style('uv run stone dev', fg=typer.colors.CYAN)}"
+            f"  • With UV:           {typer.style('stone dev', fg=typer.colors.CYAN)}"
         )
         typer.echo(
             f"  • Active venv:       {typer.style('stone dev', fg=typer.colors.CYAN)}"

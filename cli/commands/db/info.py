@@ -33,9 +33,9 @@ def db_info_command(
     Show SQLite database status, location, size, PRAGMA settings, and tables.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db info[/cyan]
-      [cyan]$ python3 -m cli db info --db-path ./data/app.db[/cyan]
-      [cyan]$ python3 -m cli db info --json[/cyan]
+      [cyan]$ stone db info[/cyan]
+      [cyan]$ stone db info --db-path ./data/app.db[/cyan]
+      [cyan]$ stone db info --json[/cyan]
     """
     path = db_path or get_db_path()
     exists = os.path.isfile(path)
@@ -115,9 +115,9 @@ def db_test_command(
     Test database connection and verify query execution.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db test[/cyan]
-      [cyan]$ python3 -m cli db test --db-path ./custom.db[/cyan]
-      [cyan]$ python3 -m cli db test --json[/cyan]
+      [cyan]$ stone db test[/cyan]
+      [cyan]$ stone db test --db-path ./custom.db[/cyan]
+      [cyan]$ stone db test --json[/cyan]
     """
     path = db_path or get_db_path()
     try:

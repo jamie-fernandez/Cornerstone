@@ -139,8 +139,8 @@ def extract_cli_metadata(
         "overview": {
             "title": "Cornerstone CLI Overview",
             "description": "Unified command-line interface for application development, builds, database operations, and template configuration.",
-            "usage": "python3 -m cli [COMMAND] [OPTIONS]",
-            "summary": "Cornerstone integrates Vue 3 (frontend) and Python / pywebview (backend). The CLI provides tools to run the dev environment, build production bundles, manage the SQLite database, inspect runtime stats, and rebrand the template.",
+            "usage": "stone [COMMAND] [OPTIONS]",
+            "summary": "Cornerstone integrates Vue 3 (frontend) and Python / pywebview (backend). The CLI provides tools to run the dev environment, build production bundles, manage the SQLite database & Alembic ORM migrations, inspect runtime stats, and rebrand the template.",
         }
     }
 
@@ -236,7 +236,7 @@ def extract_cli_metadata(
                 )
 
         # Build usage string
-        usage_parts = ["python3 -m cli", cmd_name]
+        usage_parts = ["stone", cmd_name]
         if is_group:
             usage_parts.append("[SUBCOMMAND]")
         if usage_args:
@@ -327,20 +327,24 @@ def generate_markdown_doc(
         "",
         "```bash",
         "# 1. Setup development environment and install dependencies",
-        "python3 -m cli setup",
+        "stone setup",
         "",
         "# 2. Rebrand the application template (optional)",
-        'python3 -m cli init "My App" --description "Desktop app description"',
+        'stone init "My App" --description "Desktop app description"',
         "",
         "# 3. Start development environment with hot reloading",
-        "python3 -m cli dev",
+        "stone dev",
         "",
         "# 4. Check system stats and database status",
-        "python3 -m cli stats",
-        "python3 -m cli db info",
+        "stone stats",
+        "stone db info",
         "",
-        "# 5. Build production executable",
-        "python3 -m cli build",
+        "# 5. Generate and apply Alembic migrations (when modifying models)",
+        'stone db migrate -m "create_items_table"',
+        "stone db upgrade",
+        "",
+        "# 6. Build production executable",
+        "stone build",
         "```",
         "",
         "## Commands Catalog",
@@ -460,25 +464,27 @@ def render_rich_docs(
         show_header=True,
     )
     workflow_table.add_column("Step", style="cyan", width=6)
-    workflow_table.add_column("Action", style="yellow", width=25)
+    workflow_table.add_column("Action", style="yellow", width=28)
     workflow_table.add_column("Command", style="green")
 
-    workflow_table.add_row("1", "Setup environment", "python3 -m cli setup")
+    workflow_table.add_row("1", "Setup environment", "stone setup")
     workflow_table.add_row(
         "2",
         "Rebrand template (optional)",
-        'python3 -m cli init "My App" -d "Description"',
+        'stone init "My App" -d "Description"',
     )
-    workflow_table.add_row("3", "Run dev environment", "python3 -m cli dev")
+    workflow_table.add_row("3", "Run dev environment", "stone dev")
     workflow_table.add_row(
         "4",
         "Inspect runtime & stats",
-        "python3 -m cli stats   # or python3 -m cli info",
+        "stone stats   # or stone info",
     )
     workflow_table.add_row(
-        "5", "Manage database", "python3 -m cli db info # or db test, db query"
+        "5",
+        "Database & migrations",
+        "stone db info # or db migrate, db upgrade",
     )
-    workflow_table.add_row("6", "Build desktop binary", "python3 -m cli build")
+    workflow_table.add_row("6", "Build desktop binary", "stone build")
     console.print(workflow_table)
     console.print()
 
@@ -503,7 +509,7 @@ def render_rich_docs(
     console.print(commands_table)
     console.print()
     console.print(
-        "[dim]Tip: Run [bold cyan]python3 -m cli docs <command>[/bold cyan] for detailed documentation on any specific command (e.g. [cyan]python3 -m cli docs db[/cyan] or [cyan]python3 -m cli docs init[/cyan]).[/dim]\n"
+        "[dim]Tip: Run [bold cyan]stone docs <command>[/bold cyan] for detailed documentation on any specific command (e.g. [cyan]stone docs db[/cyan] or [cyan]stone docs init[/cyan]).[/dim]\n"
     )
 
 
@@ -535,11 +541,11 @@ def docs_command(
     Browse comprehensive CLI documentation, commands catalog, and usage examples.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli docs[/cyan]                  # View full documentation guide
-      [cyan]$ python3 -m cli docs db[/cyan]               # View database command documentation
-      [cyan]$ python3 -m cli docs init[/cyan]             # View template rebranding guide
-      [cyan]$ python3 -m cli docs --markdown[/cyan]       # Output documentation in Markdown format
-      [cyan]$ python3 -m cli docs stats --json[/cyan]      # Output topic details as JSON
+      [cyan]$ stone docs[/cyan]                  # View full documentation guide
+      [cyan]$ stone docs db[/cyan]               # View database command documentation
+      [cyan]$ stone docs init[/cyan]             # View template rebranding guide
+      [cyan]$ stone docs --markdown[/cyan]       # Output documentation in Markdown format
+      [cyan]$ stone docs stats --json[/cyan]      # Output topic details as JSON
     """
     if as_json:
         catalog = extract_cli_metadata()

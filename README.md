@@ -31,10 +31,13 @@ After forking, rebrand the template into your own application in one step:
 just init "My App"                       # rename everything; reset version to 0.1.0
 just init "My App" --alias stone -a app  # register custom shorthand CLI aliases
 just init "My App" --clean-examples      # also strip placeholder/demo code
+just init "My App" --fresh-git           # re-initialize Git repository with clean initial commit
+just init -i                             # launch interactive rebranding wizard
 ```
 
 This rewrites the project name, slug, version, description, and CLI entry points (`[project.scripts]`)
-in `pyproject.toml` and `package.json`, and updates the docs. The app's identity (window title, built
+in `pyproject.toml` and `package.json`, archives original template documentation in `.cornerstone/`,
+and generates a fresh root `README.md`. The app's identity (window title, built
 executable name, macOS bundle) is derived at runtime from `[tool.app] display-name`
 and `[project] name`/`version` in `pyproject.toml` — the single source of truth — so
 there is nothing else to hand-edit. Afterwards, set an app icon and bundle id,
@@ -47,7 +50,7 @@ choose a `LICENSE`, and point CI at your own repository.
 Run the following command to install all dependencies and configure virtual environments:
 
 ```bash
-python3 -m cli setup
+stone setup
 ```
 
 **What this does:**
@@ -60,7 +63,7 @@ python3 -m cli setup
 To launch the application in development mode with hot-reload enabled for both frontend and backend:
 
 ```bash
-python3 -m cli dev
+stone dev
 ```
 
 ### ⚡ Using Just (Recommended)
@@ -85,6 +88,8 @@ just build    # Build for production
 | Command                | Purpose                                                                     |
 |:-----------------------|:----------------------------------------------------------------------------|
 | `just setup`           | Initialize the development environment and dependencies.                    |
+| `just doctor`          | Run environment and dependency health diagnostics.                          |
+| `just setup-hooks`     | Install Git pre-commit hooks for automated Ruff and Biome linting.          |
 | `just dev`             | Start both frontend and backend in development mode.                        |
 | `just cli`             | Run the application Typer CLI (e.g. `just cli --help`, `just cli db info`). |
 | `just build`           | Build the production assets for both frontend and backend.                  |
@@ -104,30 +109,34 @@ services, development tools, browsing internal CLI documentation, and managing t
 
 You can invoke the CLI through several flexible methods:
 
-- **Default Scripts:** `uv run stone <command>` or `uv run cornerstone <command>`
+- **Default Scripts:** `stone <command>` or `uv run cornerstone <command>`
 - **Active Virtualenv:** `stone <command>` (when `.venv` is activated)
 - **Global Tool:** `uv tool install --editable .` allows running `stone` / `cornerstone` anywhere on your machine
 - **Command Runner:** `just cli <command>`
 
 ```bash
-uv run stone --help             # View all CLI commands and workflows
-uv run stone docs               # Browse interactive CLI documentation guide
-uv run stone docs db            # View detailed documentation for database commands
-uv run stone docs init --markdown # Output command guide in Markdown format
-uv run stone info               # Display app details and runtime configuration
-uv run stone stats              # Display system metrics and resource usage
-uv run stone clean              # Clean up build artifacts (dist, build, ui/dist, *.spec)
-uv run stone db info            # Inspect SQLite database status, size, and tables
-uv run stone db test            # Test database connectivity
-uv run stone db init            # Initialize schema and run migrations
-uv run stone db migrate -m "create_users_table" # Generate a new sequential migration revision
-uv run stone db upgrade         # Apply pending migrations to head
-uv run stone db downgrade       # Revert previous migration revision
-uv run stone db current         # Inspect current migration revision (e.g. 0001)
-uv run stone db history         # View chronological migration history
-uv run stone db tables          # List database schema and column details
-uv run stone db query "SELECT 1"# Run a raw SQL query (supports --json)
-uv run stone db reset --yes     # Reset and re-create database file
+stone --help             # View all CLI commands and workflows
+stone doctor             # Run system environment & dependency diagnostics
+stone make api <name>    # Scaffold a new bridge API method with frontend mock
+stone make page <name>   # Scaffold a new Vue page component and route
+stone make model <name>  # Scaffold an SQLAlchemy database model
+stone hooks install      # Install Git pre-commit hook
+stone docs               # Browse interactive CLI documentation guide
+stone docs db            # View detailed documentation for database commands
+stone info               # Display app details and runtime configuration
+stone stats              # Display system metrics and resource usage
+stone clean              # Clean up build artifacts (dist, build, ui/dist, *.spec)
+stone db info            # Inspect SQLite database status, size, and tables
+stone db test            # Test database connectivity
+stone db init            # Initialize schema and run migrations
+stone db migrate -m "create_users_table" # Generate a new sequential migration revision
+stone db upgrade         # Apply pending migrations to head
+stone db downgrade       # Revert previous migration revision
+stone db current         # Inspect current migration revision (e.g. 0001)
+stone db history         # View chronological migration history
+stone db tables          # List database schema and column details
+stone db query "SELECT 1"# Run a raw SQL query (supports --json)
+stone db reset --yes     # Reset and re-create database file
 ```
 
 ## Project Structure
@@ -185,11 +194,19 @@ just test-app
 bun run test:ui:e2e
 ```
 
-### GitLab CI
+### CI/CD Workflows
 
-Pipelines run lint (Ruff/Biome + `pip-audit`), unit tests with coverage reports (JUnit + Cobertura surfaced in Merge Requests), Cypress E2E, per-OS dry-run builds, and GitLab's Secret-Detection/SAST security scans. Jobs cache dependencies keyed on the lockfiles and skip when a change doesn't touch their stack; scheduled pipelines run Renovate only. Pushing a version tag (e.g. `v0.2.0`) runs the release build and creates a GitLab Release with the Linux bundle attached.
+Cornerstone supports dual CI/CD workflows out of the box:
 
-To test and debug GitLab CI pipelines locally, it is recommended to use [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local).
+- **GitHub Actions (`.github/workflows/`):** Full multi-OS matrix testing across Ubuntu, macOS, and Windows with Ruff/Biome linting, Pytest, Vitest, Cypress E2E, and tagged release packaging.
+- **GitLab CI (`.gitlab-ci.yml`):** Pipelines run lint (Ruff/Biome + `pip-audit`), unit tests with coverage reports (JUnit + Cobertura surfaced in Merge Requests), Cypress E2E, per-OS dry-run builds, and GitLab Secret-Detection/SAST security scans.
+
+To test and debug GitLab CI pipelines locally, use [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local).
+
+### IDE Integration & Git Hooks
+
+- **JetBrains IDE Run Configurations:** Pre-configured `.run/` configurations are included for PyCharm and WebStorm (`Dev (Full App)`, `Backend Tests (Pytest)`, `Doctor Diagnostics`, and `Build Executable`).
+- **Pre-Commit Hooks:** Run `just setup-hooks` or `stone hooks install` to install automated git hooks that check staged Python files with Ruff and staged JS/Vue files with Biome before commits.
 
 ## GitLab Labels
 
@@ -215,7 +232,7 @@ To test and debug GitLab CI pipelines locally, it is recommended to use [gitlab-
 To create a standalone executable:
 
 ```bash
-python3 -m cli build
+stone build
 ```
 
 This will build the Vue frontend, then use PyInstaller (via `cli.commands.build_pyinstaller`) to bundle the Python
@@ -223,7 +240,7 @@ backend and the built UI into a single executable located in the `dist/` folder.
 
 ## Troubleshooting
 
-1. **Dependencies:** If you encounter issues, try running `python3 -m cli setup` again to ensure all tools (Bun, UV) and
+1. **Dependencies:** If you encounter issues, try running `stone setup` again to ensure all tools (Bun, UV) and
    packages are correctly installed.
 2. **Python Version:** Ensure `python --version` reports 3.13 or higher.
 3. **Port Conflicts:** The dev server uses port `5173`. Ensure it is available.
