@@ -26,11 +26,11 @@ def db_init_command(
     ] = None,
 ):
     """
-    Initialize SQLite database file and create all defined schema tables.
+    Initialize SQLite database file and apply Alembic schema migrations to head.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db init[/cyan]
-      [cyan]$ python3 -m cli db init -p ./data/app.db[/cyan]
+      [cyan]$ stone db init[/cyan]
+      [cyan]$ stone db init -p ./data/app.db[/cyan]
     """
     path = db_path or get_db_path()
     try:
@@ -72,12 +72,12 @@ def db_reset_command(
     ] = None,
 ):
     """
-    Reset database by deleting existing database file and recreating schema.
+    Reset database by deleting existing database file and reapplying Alembic schema migrations.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db reset[/cyan]                 # Prompts for confirmation
-      [cyan]$ python3 -m cli db reset --yes[/cyan]           # Skip interactive confirmation
-      [cyan]$ python3 -m cli db reset -p ./test.db -y[/cyan] # Reset custom DB path
+      [cyan]$ stone db reset[/cyan]                 # Prompts for confirmation
+      [cyan]$ stone db reset --yes[/cyan]           # Skip interactive confirmation
+      [cyan]$ stone db reset -p ./test.db -y[/cyan] # Reset custom DB path
     """
     path = db_path or get_db_path()
     if not yes:
@@ -123,9 +123,9 @@ def db_tables_command(
     List all database tables and inspect column schema details (types, nullable, PKs).
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db tables[/cyan]
-      [cyan]$ python3 -m cli db tables --json[/cyan]
-      [cyan]$ python3 -m cli db tables -p ./custom.db[/cyan]
+      [cyan]$ stone db tables[/cyan]
+      [cyan]$ stone db tables --json[/cyan]
+      [cyan]$ stone db tables -p ./custom.db[/cyan]
     """
     path = db_path or get_db_path()
     engine, _ = init_db(path)

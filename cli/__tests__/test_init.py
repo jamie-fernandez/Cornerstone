@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+from unittest.mock import patch
 
 import pytest
 
@@ -168,9 +169,11 @@ class TestUpdateDocs:
         text = (rebrand / "README.md").read_text()
         assert "My App" in text
         assert "my-app" in text
-        # The URL must be replaced *before* the slug swap, not rebranded.
-        assert "<your-repository-url>" in text
-        assert "jnf-desktop-apps" not in text
+        assert (rebrand / ".cornerstone" / "README.md").exists()
+        assert (rebrand / ".cornerstone" / "UPSTREAM.md").exists()
+        upstream_text = (rebrand / ".cornerstone" / "UPSTREAM.md").read_text()
+        assert "https://gitlab.com/jnf-desktop-apps/cornerstone" in upstream_text
+        assert "My App" in upstream_text
 
     def test_rewrites_every_existing_doc_file(self, rebrand):
         for rel in init.DOC_FILES:
@@ -181,10 +184,46 @@ class TestUpdateDocs:
         init.update_docs("My App", "my-app")
 
         for rel in init.DOC_FILES:
-            assert (rebrand / rel).read_text() == "My App"
+            assert "My App" in (rebrand / rel).read_text()
 
     def test_missing_doc_files_are_skipped(self, rebrand):
         init.update_docs("My App", "my-app")  # must not raise
+
+
+class TestConfigureCI:
+    def test_ci_github_only(self, rebrand):
+        (rebrand / ".gitlab-ci.yml").write_text("gitlab")
+        (rebrand / ".gitlab").mkdir(parents=True)
+        (rebrand / ".github").mkdir(parents=True)
+
+        init.configure_ci_workflows("github")
+        assert not (rebrand / ".gitlab-ci.yml").exists()
+        assert not (rebrand / ".gitlab").exists()
+        assert (rebrand / ".github").exists()
+
+    def test_ci_gitlab_only(self, rebrand):
+        (rebrand / ".gitlab-ci.yml").write_text("gitlab")
+        (rebrand / ".github").mkdir(parents=True)
+
+        init.configure_ci_workflows("gitlab")
+        assert not (rebrand / ".github").exists()
+        assert (rebrand / ".gitlab-ci.yml").exists()
+
+    def test_ci_both(self, rebrand):
+        (rebrand / ".gitlab-ci.yml").write_text("gitlab")
+        (rebrand / ".github").mkdir(parents=True)
+
+        init.configure_ci_workflows("both")
+        assert (rebrand / ".github").exists()
+        assert (rebrand / ".gitlab-ci.yml").exists()
+
+
+class TestGitReinit:
+    def test_reinitialize_git_repository(self, rebrand):
+        (rebrand / ".git").mkdir(parents=True)
+        with patch("subprocess.run") as mock_run:
+            init.reinitialize_git_repository("My App")
+            assert mock_run.called
 
 
 class TestCleanExamples:

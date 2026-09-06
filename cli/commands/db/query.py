@@ -36,9 +36,9 @@ def db_query_command(
     Execute an arbitrary SQL query against the SQLite database and display results.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli db query "SELECT 1 AS status, 'ok' AS message"[/cyan]
-      [cyan]$ python3 -m cli db query "SELECT * FROM users"[/cyan]
-      [cyan]$ python3 -m cli db query "SELECT count(*) FROM users" --json[/cyan]
+      [cyan]$ stone db query "SELECT 1 AS status, 'ok' AS message"[/cyan]
+      [cyan]$ stone db query "SELECT * FROM users"[/cyan]
+      [cyan]$ stone db query "SELECT count(*) FROM users" --json[/cyan]
     """
     path = db_path or get_db_path()
     init_db(path)

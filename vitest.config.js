@@ -7,7 +7,11 @@ export default mergeConfig(
     defineConfig({
         test: {
             environment: 'jsdom',
-            exclude: [...configDefaults.exclude, 'e2e/**'],
+            exclude: [
+                ...configDefaults.exclude,
+                'e2e/**',
+                '.gitlab-ci-local/**',
+            ],
             root: fileURLToPath(new URL('./', import.meta.url)),
             coverage: {
                 // istanbul (not v8): v8 coverage needs Node's inspector APIs, but CI

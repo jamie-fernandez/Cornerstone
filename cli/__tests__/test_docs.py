@@ -100,8 +100,8 @@ class TestIntrospectionEngine:
         Execute a sample command.
 
         [bold green]Examples:[/bold green]
-          [cyan]$ python3 -m cli sample[/cyan]                  # Standard run
-          [cyan]$ python3 -m cli sample --dry-run[/cyan]        # Dry run preview
+          [cyan]$ stone sample[/cyan]                  # Standard run
+          [cyan]$ stone sample --dry-run[/cyan]        # Dry run preview
 
         [bold yellow]Notes:[/bold yellow]
           Requires active network connection.
@@ -109,9 +109,9 @@ class TestIntrospectionEngine:
         parsed = parse_docstring(doc)
         assert parsed["description"] == "Execute a sample command."
         assert len(parsed["examples"]) == 2
-        assert parsed["examples"][0]["command"] == "python3 -m cli sample"
+        assert parsed["examples"][0]["command"] == "stone sample"
         assert parsed["examples"][0]["description"] == "Standard run"
-        assert parsed["examples"][1]["command"] == "python3 -m cli sample --dry-run"
+        assert parsed["examples"][1]["command"] == "stone sample --dry-run"
         assert parsed["examples"][1]["description"] == "Dry run preview"
         assert parsed["notes"] == "Requires active network connection."
 
@@ -130,8 +130,8 @@ class TestIntrospectionEngine:
             Execute a custom user-defined task with parameters.
 
             [bold green]Examples:[/bold green]
-              [cyan]$ python3 -m cli custom-task deploy[/cyan]          # Run deploy task
-              [cyan]$ python3 -m cli custom-task deploy --force[/cyan]  # Force deploy
+              [cyan]$ stone custom-task deploy[/cyan]          # Run deploy task
+              [cyan]$ stone custom-task deploy --force[/cyan]  # Force deploy
             """
 
         clear_docs_cache()
@@ -147,7 +147,7 @@ class TestIntrospectionEngine:
         assert len(doc["options"]) == 1
         assert doc["options"][0]["flag"] == "--force / -f"
         assert len(doc["examples"]) == 2
-        assert doc["examples"][0]["command"] == "python3 -m cli custom-task deploy"
+        assert doc["examples"][0]["command"] == "stone custom-task deploy"
 
         md = generate_markdown_doc("custom-task", app=test_app)
         assert "custom-task" in md

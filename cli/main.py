@@ -13,21 +13,35 @@ from app.config import CONFIG
 from app.database import get_db_path
 from cli.commands.db import db_app
 from cli.commands.docs import docs_command
+from cli.commands.doctor import doctor_command
+from cli.commands.hooks import hooks_app
+from cli.commands.make import (
+    make_api_command,
+    make_app,
+    make_model_command,
+    make_page_command,
+)
 
 app = typer.Typer(
     name=CONFIG.get("SLUG", "cornerstone"),
     help="""[bold cyan]Cornerstone CLI[/bold cyan] - Cross-platform desktop application CLI.
 
 [bold]Common Workflows:[/bold]
-  [cyan]$ uv run stone setup[/cyan]              # Install Bun/UV and dependencies (or python3 -m cli setup)
-  [cyan]$ uv run stone dev[/cyan]                # Start development environment
-  [cyan]$ uv run stone db info[/cyan]            # Inspect SQLite database status
-  [cyan]$ uv run stone build[/cyan]              # Build desktop executable
-  [cyan]$ uv run stone clean[/cyan]              # Clean build artifacts and temporary files
-  [cyan]$ uv run stone docs[/cyan]               # Browse CLI interactive documentation
+  [cyan]$ stone setup[/cyan]                  # Install Bun/UV and dependencies (or stone setup)
+  [cyan]$ stone doctor[/cyan]                 # Run system environment & dependency diagnostics
+  [cyan]$ stone dev[/cyan]                    # Start development environment
+  [cyan]$ stone make api <name>[/cyan]         # Scaffold a new bridge API method with mock
+  [cyan]$ stone make page <name>[/cyan]        # Scaffold a new Vue page and register route
+  [cyan]$ stone make model <name>[/cyan]       # Scaffold an SQLAlchemy database model
+  [cyan]$ stone db info[/cyan]                # Inspect SQLite database status
+  [cyan]$ stone db migrate -m "..."[/cyan]    # Generate sequential Alembic migration revision
+  [cyan]$ stone db upgrade[/cyan]             # Apply pending database migrations to head
+  [cyan]$ stone build[/cyan]                  # Build desktop executable
+  [cyan]$ stone clean[/cyan]                  # Clean build artifacts and temporary files
+  [cyan]$ stone docs[/cyan]                   # Browse CLI interactive documentation
 
 [bold]Direct CLI Invocations:[/bold]
-  • With UV:           [cyan]$ uv run stone <command>[/cyan]
+  • With UV:           [cyan]$ stone <command>[/cyan]
   • Active venv:       [cyan]$ stone <command>[/cyan]
   • Global tool:       [cyan]$ uv tool install --editable .[/cyan] -> [cyan]$ stone <command>[/cyan]
 """,
@@ -35,10 +49,19 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(db_app, name="db")
+app.add_typer(make_app, name="make")
+app.add_typer(hooks_app, name="hooks")
 app.command(
     "docs",
     short_help="Browse comprehensive CLI documentation, commands catalog, and usage examples.",
 )(docs_command)
+app.command(
+    "doctor",
+    short_help="Diagnose environment prerequisites, dependencies, and database health.",
+)(doctor_command)
+app.command("make:api", hidden=True)(make_api_command)
+app.command("make:page", hidden=True)(make_page_command)
+app.command("make:model", hidden=True)(make_model_command)
 
 console = Console()
 
@@ -54,8 +77,8 @@ def version_command(
     Print application name, slug, version, and Python runtime version.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli version[/cyan]                  # Display human-readable formatted version string
-      [cyan]$ python3 -m cli version --json[/cyan]           # Output version details as JSON for CI/CD scripting
+      [cyan]$ stone version[/cyan]                  # Display human-readable formatted version string
+      [cyan]$ stone version --json[/cyan]           # Output version details as JSON for CI/CD scripting
     """
     data = {
         "name": CONFIG.get("NAME"),
@@ -85,9 +108,9 @@ def info_command(
     Display application details and runtime configuration (paths, debug flag, database location).
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli info[/cyan]                     # Print formatted table of runtime paths, debug flag, and DB path
-      [cyan]$ python3 -m cli info --json[/cyan]              # Export runtime configuration as JSON
-      [cyan]$ python3 -m cli info -j[/cyan]                  # Export runtime configuration as JSON (short flag)
+      [cyan]$ stone info[/cyan]                     # Print formatted table of runtime paths, debug flag, and DB path
+      [cyan]$ stone info --json[/cyan]              # Export runtime configuration as JSON
+      [cyan]$ stone info -j[/cyan]                  # Export runtime configuration as JSON (short flag)
     """
     from app.api import API
 
@@ -137,8 +160,8 @@ def stats_command(
     Show system resource usage and hardware statistics (CPU, memory, disk, and OS info).
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli stats[/cyan]                    # Display table with live CPU, memory, and disk utilization metrics
-      [cyan]$ python3 -m cli stats --json[/cyan]             # Get structured metrics payload
+      [cyan]$ stone stats[/cyan]                    # Display table with live CPU, memory, and disk utilization metrics
+      [cyan]$ stone stats --json[/cyan]             # Get structured metrics payload
     """
     from app.api import API
 
@@ -205,8 +228,8 @@ def users_command(
     List example user records retrieved via the Python backend API.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli users[/cyan]                    # Display formatted table of sample users
-      [cyan]$ python3 -m cli users --json[/cyan]             # Export user records as JSON array
+      [cyan]$ stone users[/cyan]                    # Display formatted table of sample users
+      [cyan]$ stone users --json[/cyan]             # Export user records as JSON array
     """
     from app.api import API
 
@@ -241,11 +264,11 @@ def dev_command():
     Start development environment with hot reloading (Vite frontend + pywebview backend).
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli dev[/cyan]                      # Start the Vite dev server and launch the desktop window
-      [cyan]$ just dev[/cyan]                                # Shortcut alias via just command runner
+      [cyan]$ stone dev[/cyan]                      # Start the Vite dev server and launch the desktop window
+      [cyan]$ just dev[/cyan]                       # Shortcut alias via just command runner
 
     [bold yellow]Notes:[/bold yellow]
-      Ensure dependencies are installed first (`python3 -m cli setup`). Press Ctrl+C in the terminal to gracefully stop both servers.
+      Ensure dependencies are installed first (`stone setup`). Press Ctrl+C in the terminal to gracefully stop both servers.
     """
     from cli.commands.dev import main as dev_main
 
@@ -264,8 +287,8 @@ def build_command():
     Build production frontend assets (Vite) and package standalone PyInstaller executable.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli build[/cyan]                    # Build frontend assets into dist/ and generate the standalone desktop executable
-      [cyan]$ just build[/cyan]                              # Shortcut alias via just command runner
+      [cyan]$ stone build[/cyan]      # Build frontend assets into dist/ and generate the standalone desktop executable
+      [cyan]$ just build[/cyan]       # Shortcut alias via just command runner
 
     [bold yellow]Notes:[/bold yellow]
       Outputs are written to the 'dist/' directory. Requires PyInstaller and Bun to be available.
@@ -301,9 +324,9 @@ def clean_command(
     Clean up build artifacts produced by Vite and PyInstaller (dist/, build/, ui/dist/, *.spec).
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli clean[/cyan]                    # Remove all build artifacts and temporary files
-      [cyan]$ python3 -m cli clean --dry-run[/cyan]          # Preview build artifacts to delete without removing them
-      [cyan]$ python3 -m cli clean --json[/cyan]             # Output clean results as structured JSON
+      [cyan]$ stone clean[/cyan]                    # Remove all build artifacts and temporary files
+      [cyan]$ stone clean --dry-run[/cyan]          # Preview build artifacts to delete without removing them
+      [cyan]$ stone clean --json[/cyan]             # Output clean results as structured JSON
       [cyan]$ just clean[/cyan]                              # Shortcut alias via just command runner
 
     [bold yellow]Notes:[/bold yellow]
@@ -323,7 +346,7 @@ def setup_command():
     Initialize development environment by verifying/installing Bun, UV, and all dependencies.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli setup[/cyan]                    # Check for Bun and UV, install if missing, and sync all packages
+      [cyan]$ stone setup[/cyan]                    # Check for Bun and UV, install if missing, and sync all packages
       [cyan]$ just setup[/cyan]                              # Shortcut alias via just command runner
 
     [bold yellow]Notes:[/bold yellow]
@@ -337,9 +360,17 @@ def setup_command():
 @app.command("init", short_help="Rebrand this template into your own application.")
 def init_command(
     name: Annotated[
-        list[str],
+        list[str] | None,
         typer.Argument(help='Human-facing app name, e.g. "My App"'),
-    ],
+    ] = None,
+    interactive: Annotated[
+        bool,
+        typer.Option(
+            "--interactive",
+            "-i",
+            help="Run interactive rebranding wizard",
+        ),
+    ] = False,
     description: Annotated[
         str,
         typer.Option("--description", "-d", help="Short project description"),
@@ -359,25 +390,60 @@ def init_command(
             help="Remove placeholder example code",
         ),
     ] = False,
+    ci: Annotated[
+        str,
+        typer.Option(
+            "--ci",
+            help="CI/CD workflows to configure ('both', 'github', 'gitlab')",
+        ),
+    ] = "both",
+    fresh_git: Annotated[
+        bool,
+        typer.Option(
+            "--fresh-git",
+            "--reset-git",
+            help="Re-initialize a fresh Git repository with clean initial commit",
+        ),
+    ] = False,
 ):
     """
     Rebrand this template into your own customized desktop application.
 
     [bold green]Examples:[/bold green]
-      [cyan]$ python3 -m cli init "My Awesome App"[/cyan]                               # Rebrand template with a new application name
-      [cyan]$ python3 -m cli init "Task Flow" -d "A lightweight desktop task manager" --alias tf -a stone[/cyan] # Rebrand with a custom description, CLI aliases, and script registration
-      [cyan]$ python3 -m cli init "Note Forge" -a nf --clean-examples[/cyan]               # Rebrand with an alias and purge example/demo code
+      [cyan]$ stone init "My Awesome App"[/cyan]                               # Rebrand template with a new application name
+      [cyan]$ stone init -i[/cyan]                                                # Launch interactive rebranding wizard
+      [cyan]$ stone init "Task Flow" -d "A lightweight desktop task manager" --alias tf -a stone[/cyan] # Rebrand with a custom description, CLI aliases, and script registration
+      [cyan]$ stone init "Note Forge" -a nf --clean-examples --fresh-git[/cyan]   # Rebrand, clean examples, and start fresh Git history
 
     [bold yellow]Notes:[/bold yellow]
-      Updates pyproject.toml ([project.scripts] and metadata), package.json, README.md, and AGENTS.md automatically.
+      Archives original template documentation in .cornerstone/, generates a fresh README.md, and updates project metadata.
     """
-    from cli.commands.init import rebrand
+    from cli.commands.init import interactive_wizard, rebrand
+
+    if interactive or not name:
+        display_name, desc, aliases, clean_ex, ci_val, fresh_g = interactive_wizard()
+        rebrand(
+            display_name,
+            desc,
+            clean_ex,
+            aliases=aliases,
+            ci=ci_val,
+            fresh_git=fresh_g,
+        )
+        return
 
     display_name = " ".join(name).strip()
     if not display_name:
         console.print("[bold red]Error:[/bold red] app name must not be empty")
         raise typer.Exit(code=2)
-    rebrand(display_name, description, clean_examples, aliases=alias)
+    rebrand(
+        display_name,
+        description,
+        clean_examples,
+        aliases=alias,
+        ci=ci,
+        fresh_git=fresh_git,
+    )
 
 
 if __name__ == "__main__":

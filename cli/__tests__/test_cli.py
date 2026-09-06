@@ -101,7 +101,9 @@ class TestAppCommands:
                 ["init", "My", "App", "--description", "Desc", "--clean-examples"],
             )
             assert result.exit_code == 0
-            mock_rebrand.assert_called_once_with("My App", "Desc", True, aliases=None)
+            mock_rebrand.assert_called_once_with(
+                "My App", "Desc", True, aliases=None, ci="both", fresh_git=False
+            )
 
     def test_init_command_with_aliases(self):
         with patch("cli.commands.init.rebrand") as mock_rebrand:
@@ -111,7 +113,7 @@ class TestAppCommands:
             )
             assert result.exit_code == 0
             mock_rebrand.assert_called_once_with(
-                "My App", "", False, aliases=["stone", "tf"]
+                "My App", "", False, aliases=["stone", "tf"], ci="both", fresh_git=False
             )
 
     def test_cli_help_contains_workflows_and_examples(self):
@@ -133,6 +135,7 @@ class TestAppCommands:
             "stats",
             "users",
             "docs",
+            "doctor",
         ]:
             result = runner.invoke(app, [cmd, "--help"])
             assert result.exit_code == 0
