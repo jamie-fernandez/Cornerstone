@@ -1,250 +1,48 @@
 # Cornerstone
 
-A template repository for building cross-platform desktop applications for macOS, Linux, and Windows using Vue.js and Python.
+> A modern, batteries-included template repository for building cross-platform desktop applications using Vue.js 3 and Python 3.13+, bridged seamlessly via `pywebview`.
 
-## Overview
+---
 
-Cornerstone provides a robust starting point for desktop application development by combining a modern Vue.js frontend with a powerful Python backend, unified through the `pywebview` library. It leverages high-performance package managers and development tools to ensure a smooth developer experience.
-
-### Tech Stack
-
-- **Frontend:** [Vue.js 3](https://vuejs.org/) with [Vite](https://vitejs.dev/)
-- **UI Framework:** [Vuetify 3](https://vuetifyjs.com/) & [Tailwind CSS 4](https://tailwindcss.com/)
-- **Backend:** [Python 3.13+](https://www.python.org/)
-- **Desktop Bridge:** [pywebview](https://pywebview.flowrl.com/)
-- **Database:** [SQLAlchemy](https://www.sqlalchemy.org/) (SQLite by default)
-- **Package Managers:** [Bun](https://bun.sh/) & [UV](https://docs.astral.sh/uv/) (Python). **Note:** We use `uv` for all Python dependency management and execution. Do not use `pip`.
-- **Code Quality:** [Biome](https://biomejs.dev/) (JS/TS) & [Ruff](https://docs.astral.sh/ruff/) (Python)
-- **Testing:** [Vitest](https://vitest.dev/) (Unit), [Pytest](https://pytest.org/) (Backend), [Cypress](https://www.cypress.io/) (E2E)
-
-## Requirements
-
-- **Python:** 3.13 or higher
-- **Bun:** (Will be auto-installed by setup if missing)
-- **UV:** (Will be auto-installed by setup if missing)
-
-## Make It Your Own
-
-After forking, rebrand the template into your own application in one step:
+## 🚀 Quick Start
 
 ```bash
-just init "My App"                       # rename everything; reset version to 0.1.0
-just init "My App" --alias stone -a app  # register custom shorthand CLI aliases
-just init "My App" --clean-examples      # also strip placeholder/demo code
-just init "My App" --fresh-git           # re-initialize Git repository with clean initial commit
-just init -i                             # launch interactive rebranding wizard
+# 1. Install dependencies and set up virtual environments
+stone setup   # or `just setup`
+
+# 2. Run the application in development mode with hot-reload
+stone dev     # or `just dev`
+
+# 3. Rebrand the template into your own application in one step
+stone init "My App" -d "A powerful desktop application."
 ```
 
-This rewrites the project name, slug, version, description, and CLI entry points (`[project.scripts]`)
-in `pyproject.toml` and `package.json`, archives original template documentation in `.cornerstone/`,
-and generates a fresh root `README.md`. The app's identity (window title, built
-executable name, macOS bundle) is derived at runtime from `[tool.app] display-name`
-and `[project] name`/`version` in `pyproject.toml` — the single source of truth — so
-there is nothing else to hand-edit. Afterwards, set an app icon and bundle id,
-choose a `LICENSE`, and point CI at your own repository.
+---
 
-## Getting Started
+## ⚡ Tech Stack
 
-### 1. Setup Development Environment
+- **Frontend:** [Vue.js 3](https://vuejs.org/) • [Vite](https://vitejs.dev/) • [Vuetify 3](https://vuetifyjs.com/) • [Tailwind CSS 4](https://tailwindcss.com/) • [Pinia](https://pinia.vuejs.org/)
+- **Backend:** [Python 3.13+](https://www.python.org/) • [pywebview](https://pywebview.flowrl.com/) • [SQLAlchemy](https://www.sqlalchemy.org/) • [Alembic](https://alembic.sqlalchemy.org/)
+- **Tooling:** [Bun](https://bun.sh/) • [UV](https://docs.astral.sh/uv/) • [Biome](https://biomejs.dev/) • [Ruff](https://docs.astral.sh/ruff/) • [just](https://github.com/casey/just)
+- **Testing:** [Vitest](https://vitest.dev/) • [Pytest](https://pytest.org/) • [Cypress](https://www.cypress.io/)
 
-Run the following command to install all dependencies and configure virtual environments:
+---
 
-```bash
-stone setup
-```
+## 📖 Documentation
 
-**What this does:**
-- Checks for and installs **Bun.js** and **UV** if they are missing.
-- Installs frontend dependencies using `bun install`.
-- Installs Python dependencies and creates a virtual environment using `uv sync`.
+Comprehensive documentation, architectural deep dives, CLI guides, and development workflows are organized in the **[`docs/`](docs/)** directory:
 
-### 2. Start the Application
+- 📚 **[Documentation Overview & Table of Contents](docs/README.md)**
+- 🚀 **[Getting Started Guide](docs/getting-started.md)** — Prerequisites, environment setup, and development workflow.
+- 🏗️ **[Architecture & The Bridge](docs/architecture.md)** — Python-JS bridge mechanism, request lifecycle, and project structure.
+- 🎨 **[Rebranding & Customization](docs/rebranding.md)** — Rebranding wizard, clean examples, and making the template your own.
+- 🛠️ **[CLI Reference](docs/cli.md)** — Built-in `stone` commands, code generators, and utilities.
+- 🗄️ **[Database & Migrations](docs/database.md)** — Working with SQLite models and sequential Alembic migrations.
+- 🧪 **[Development & Testing](docs/development.md)** — Unit tests, E2E testing with Cypress, and CI/CD pipelines.
+- 📦 **[Building & Distribution](docs/building.md)** — Packaging standalone executables for macOS, Windows, and Linux.
 
-To launch the application in development mode with hot-reload enabled for both frontend and backend:
+---
 
-```bash
-stone dev
-```
+## 🤖 For AI Developers & Agents
 
-### ⚡ Using Just (Recommended)
-
-If you have [just](https://github.com/casey/just) installed, you can use these shortcuts:
-
-```bash
-just setup    # Initialize the environment
-just dev      # Start development mode
-just test     # Run all tests
-just lint     # Run linters
-just build    # Build for production
-```
-
-**What to expect:**
-- The Vite development server starts for the Vue frontend.
-- The Python backend launches and opens a `pywebview` window.
-- The application window will appear, loading the frontend from the dev server.
-
-## Available Commands
-
-| Command                | Purpose                                                                     |
-|:-----------------------|:----------------------------------------------------------------------------|
-| `just setup`           | Initialize the development environment and dependencies.                    |
-| `just doctor`          | Run environment and dependency health diagnostics.                          |
-| `just setup-hooks`     | Install Git pre-commit hooks for automated Ruff and Biome linting.          |
-| `just dev`             | Start both frontend and backend in development mode.                        |
-| `just cli`             | Run the application Typer CLI (e.g. `just cli --help`, `just cli db info`). |
-| `just build`           | Build the production assets for both frontend and backend.                  |
-| `just clean`           | Clean up build artifacts and temporary files.                               |
-| `bun run dev`          | Start only the Vite development server (frontend).                          |
-| `bun run test:ui:unit` | Run frontend unit tests using Vitest.                                       |
-| `just test-app`        | Run backend unit tests using Pytest.                                        |
-| `bun run test:ui:e2e`  | Run end-to-end tests using Cypress.                                         |
-| `bun run lint:fix`     | Run Biome to check and fix code formatting/linting.                         |
-| `just build-win`       | Package the application as a Windows executable.                            |
-| `just build-mac`       | Package the application as a macOS bundle.                                  |
-
-### Command Line Interface (CLI)
-
-Cornerstone includes a built-in Typer CLI (`cli` package) with rich formatting for interacting with application
-services, development tools, browsing internal CLI documentation, and managing the SQLite database.
-
-You can invoke the CLI through several flexible methods:
-
-- **Default Scripts:** `stone <command>` or `uv run cornerstone <command>`
-- **Active Virtualenv:** `stone <command>` (when `.venv` is activated)
-- **Global Tool:** `uv tool install --editable .` allows running `stone` / `cornerstone` anywhere on your machine
-- **Command Runner:** `just cli <command>`
-
-```bash
-stone --help             # View all CLI commands and workflows
-stone doctor             # Run system environment & dependency diagnostics
-stone make api <name>    # Scaffold a new bridge API method with frontend mock
-stone make page <name>   # Scaffold a new Vue page component and route
-stone make model <name>  # Scaffold an SQLAlchemy database model
-stone hooks install      # Install Git pre-commit hook
-stone docs               # Browse interactive CLI documentation guide
-stone docs db            # View detailed documentation for database commands
-stone info               # Display app details and runtime configuration
-stone stats              # Display system metrics and resource usage
-stone clean              # Clean up build artifacts (dist, build, ui/dist, *.spec)
-stone db info            # Inspect SQLite database status, size, and tables
-stone db test            # Test database connectivity
-stone db init            # Initialize schema and run migrations
-stone db migrate -m "create_users_table" # Generate a new sequential migration revision
-stone db upgrade         # Apply pending migrations to head
-stone db downgrade       # Revert previous migration revision
-stone db current         # Inspect current migration revision (e.g. 0001)
-stone db history         # View chronological migration history
-stone db tables          # List database schema and column details
-stone db query "SELECT 1"# Run a raw SQL query (supports --json)
-stone db reset --yes     # Reset and re-create database file
-```
-
-## Project Structure
-
-```text
-cornerstone/
-├── alembic.ini         # Alembic migration configuration
-├── app/                # Python Backend
-│   ├── api.py          # JS-exposed API classes
-│   ├── config.py       # Backend configuration
-│   ├── database.py     # Database & SQLAlchemy setup
-│   ├── migrations/     # Database schema migrations & versions
-│   ├── models.py       # Database models
-│   └── __tests__/      # Backend unit tests
-├── cli/                # Application CLI and Developer Tools
-│   ├── commands/       # CLI command implementations (build, clean, dev, init, setup, db)
-│   ├── common.py       # Shared CLI helpers & executable resolution
-│   ├── main.py         # Typer application definition
-│   └── __tests__/      # CLI unit tests
-├── ui/                 # Vue.js Frontend
-│   ├── App.vue         # Root Vue component
-│   ├── main.js         # Frontend entry point
-│   ├── pages/          # Vue page components
-│   ├── stores/         # Pinia state management
-│   ├── utils/          # Python bridge client & shared helpers
-│   └── __tests__/      # Frontend unit tests
-├── cypress/            # End-to-end tests
-├── dist/               # Production build output
-├── index.html          # Vite entry HTML
-├── pyproject.toml      # Python project configuration
-├── package.json        # Frontend project configuration
-└── start.py            # Main application entry point (Python)
-```
-
-## Environment Variables
-
-Currently, the project uses a centralized configuration in `app/config.py`.
-
-- **TODO:** Implement support for `.env` files if environment-specific overrides are needed.
-
-## Testing
-
-### Frontend Unit Tests
-```bash
-bun run test:ui:unit
-```
-
-### Backend Unit Tests
-```bash
-just test-app
-```
-
-### End-to-End Tests
-```bash
-bun run test:ui:e2e
-```
-
-### CI/CD Workflows
-
-Cornerstone supports dual CI/CD workflows out of the box:
-
-- **GitHub Actions (`.github/workflows/`):** Full multi-OS matrix testing across Ubuntu, macOS, and Windows with Ruff/Biome linting, Pytest, Vitest, Cypress E2E, and tagged release packaging.
-- **GitLab CI (`.gitlab-ci.yml`):** Pipelines run lint (Ruff/Biome + `pip-audit`), unit tests with coverage reports (JUnit + Cobertura surfaced in Merge Requests), Cypress E2E, per-OS dry-run builds, and GitLab Secret-Detection/SAST security scans.
-
-To test and debug GitLab CI pipelines locally, use [gitlab-ci-local](https://github.com/firecow/gitlab-ci-local).
-
-### IDE Integration & Git Hooks
-
-- **JetBrains IDE Run Configurations:** Pre-configured `.run/` configurations are included for PyCharm and WebStorm (`Dev (Full App)`, `Backend Tests (Pytest)`, `Doctor Diagnostics`, and `Build Executable`).
-- **Pre-Commit Hooks:** Run `just setup-hooks` or `stone hooks install` to install automated git hooks that check staged Python files with Ruff and staged JS/Vue files with Biome before commits.
-
-## GitLab Labels
-
-| Label                  | Description                                                                              |
-|------------------------|------------------------------------------------------------------------------------------|
-| frontend               | Changes related to the Vue.js frontend (ui/ directory).                                  |
-| backend                | Changes related to the Python backend (app/ directory or start.py file).                 |
-| feature                | A new feature for the user; aligns with a MINOR version bump in semver.                  |
-| fix                    | A bug fix for the user; aligns with a PATCH version bump in semver.                      |
-| breaking-change        | A change that breaks backward compatibility; aligns with a MAJOR version bump in semver. |
-| documentation          | Changes to documentation only, with no effect on code behavior.                          |
-| style                  | Formatting or whitespace changes that don't affect code logic.                           |
-| refactor               | A code change that neither fixes a bug nor adds a feature.                               |
-| performance            | A code change that improves performance.                                                 |
-| testing                | Adding or correcting tests, with no changes to production code.                          |
-| build                  | Changes to the build system or external dependencies.                                    |
-| continuous-integration | Changes to CI configuration files and scripts.                                           |
-| chore                  | Routine maintenance tasks that don't modify source or test files.                        |
-| revert                 | Reverts a previous commit.                                                               |
-
-## Building for Production
-
-To create a standalone executable:
-
-```bash
-stone build
-```
-
-This will build the Vue frontend, then use PyInstaller (via `cli.commands.build_pyinstaller`) to bundle the Python
-backend and the built UI into a single executable located in the `dist/` folder.
-
-## Troubleshooting
-
-1. **Dependencies:** If you encounter issues, try running `stone setup` again to ensure all tools (Bun, UV) and
-   packages are correctly installed.
-2. **Python Version:** Ensure `python --version` reports 3.13 or higher.
-3. **Port Conflicts:** The dev server uses port `5173`. Ensure it is available.
-
-## License
-
-- **TODO:** Add license information (e.g., MIT, Apache 2.0).
+If you are developing with an AI coding assistant, refer to **[AGENTS.md](AGENTS.md)** for developer instructions, architecture conventions, and coding standards.

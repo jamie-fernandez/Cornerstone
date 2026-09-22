@@ -115,6 +115,7 @@ To add a feature that requires backend logic:
 - `start.py`: Application entry point and window configuration.
 - `cli/`: Unified Typer CLI package for application operations, dev tools, interactive documentation, and database
   management.
+- `docs/`: Comprehensive Cornerstone documentation guides (Getting Started, Architecture, CLI, Database, Development, Building).
 - `app/api.py`: The "Brain" - defines the interface between JS and Python.
 - `app/decorators.py`: Bridge decorators (`@bridge_method` response envelope).
 - `app/exceptions.py`: Bridge exception types (`BridgeError` for user-facing messages).
