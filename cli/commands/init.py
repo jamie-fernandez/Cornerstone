@@ -117,6 +117,12 @@ def archive_template_docs(display_name: str, slug: str) -> None:
     if os.path.exists(src_agents) and not os.path.exists(dest_agents):
         shutil.copyfile(src_agents, dest_agents)
 
+    # Copy template docs directory if not already archived
+    src_docs = os.path.join(PROJECT_ROOT, "docs")
+    dest_docs = os.path.join(cornerstone_dir, "docs")
+    if os.path.exists(src_docs) and not os.path.exists(dest_docs):
+        shutil.copytree(src_docs, dest_docs)
+
     # Write UPSTREAM.md
     now_str = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
     upstream_content = f"""# Upstream Template Information

@@ -163,6 +163,8 @@ class TestUpdateDocs:
     def test_swaps_brand_and_upstream_url_in_order(self, rebrand):
         readme = "# Cornerstone\ncornerstone docs\nhttps://gitlab.com/jnf-desktop-apps/cornerstone\n"
         (rebrand / "README.md").write_text(readme)
+        (rebrand / "docs").mkdir()
+        (rebrand / "docs" / "getting-started.md").write_text("# Getting Started")
 
         init.update_docs("My App", "my-app")
 
@@ -171,6 +173,7 @@ class TestUpdateDocs:
         assert "my-app" in text
         assert (rebrand / ".cornerstone" / "README.md").exists()
         assert (rebrand / ".cornerstone" / "UPSTREAM.md").exists()
+        assert (rebrand / ".cornerstone" / "docs" / "getting-started.md").exists()
         upstream_text = (rebrand / ".cornerstone" / "UPSTREAM.md").read_text()
         assert "https://gitlab.com/jnf-desktop-apps/cornerstone" in upstream_text
         assert "My App" in upstream_text
