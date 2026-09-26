@@ -1,6 +1,4 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": [
-        "gitlab>jnf-desktop-apps/renovate"
-    ]
+    "extends": ["gitlab>jnf-desktop-apps/renovate"]
 }
